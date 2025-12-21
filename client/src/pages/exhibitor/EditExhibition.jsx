@@ -128,7 +128,7 @@ const EditExhibition = () => {
 
             // Append new media
             mediaFiles.forEach(file => {
-                data.append('media', file);
+                data.append('mediaFiles', file);
             });
 
             await api.put(`/api/exhibitions/${id}`, data, {

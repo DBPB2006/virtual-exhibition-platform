@@ -28,7 +28,7 @@ const sessionMiddleware = session({
     }),
     cookie: {
         httpOnly: true,
-        secure: false, // Set to true in production
+        secure: false, 
         maxAge: 1000 * 60 * 60 * 24 // 1 day
     }
 });

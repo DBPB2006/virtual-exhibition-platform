@@ -36,6 +36,7 @@ router.put(
     "/:id",
     requireAuthentication,
     enforceRoleAccess(["exhibitor"]),
+    upload.array('mediaFiles', 10), // Allow updates with files
     validateExhibitDates,
     exhibitionController.updateExhibitDetails
 );

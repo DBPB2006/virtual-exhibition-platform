@@ -100,6 +100,8 @@ exports.fetchMyExhibits = async (req, res) => {
 
 // Updates details of an existing exhibition, ensuring ownership authorization
 
+// Updates details of an existing exhibition, ensuring ownership authorization
+
 exports.updateExhibitDetails = async (req, res) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -115,12 +117,22 @@ exports.updateExhibitDetails = async (req, res) => {
             return res.status(403).json({ message: "Not authorized" });
         }
 
-        const { title, description, category, status, coverImage, price, isOnSale } = req.body;
+        const { title, description, category, startDate, endDate, status, price, isOnSale } = req.body;
 
         if (status && !["draft", "published"].includes(status)) {
             return res.status(400).json({ message: "Invalid status" });
         }
 
+        // Update Fields
+        if (title) exhibition.title = title;
+        if (description) exhibition.description = description;
+        if (category) exhibition.category = category;
+        if (startDate) exhibition.startDate = startDate;
+        if (endDate) exhibition.endDate = endDate;
+        if (status) exhibition.status = status;
+        if (isOnSale !== undefined) exhibition.isOnSale = isOnSale; // Boolean check
+
+        // Handle Price Updates
         if (price !== undefined) {
             // Unified: Assumes input price is always INR
             const newPrice = Number(price);
@@ -133,10 +145,33 @@ exports.updateExhibitDetails = async (req, res) => {
             exhibition.currency = "INR";
         }
 
-        // Force reset legacy fields if they exist
-        if (req.body.currency) {
-            // We ignore the incoming currency label and enforce INR, 
-            // but we don't error out to keep API flexible.
+        // Handle New Media Uploads (if any)
+        if (req.files && req.files.length > 0) {
+            const protocol = req.protocol;
+            const host = req.get('host');
+
+            const newMedia = req.files.map(file => {
+                const fileUrl = `${protocol}://${host}/uploads/exhibitions/${file.filename}`;
+                let type = 'image';
+                if (file.mimetype.startsWith('video/')) type = 'video';
+                if (file.mimetype.startsWith('audio/')) type = 'audio';
+
+                return {
+                    url: fileUrl,
+                    type: type,
+                    originalName: file.originalname
+                };
+            });
+
+            exhibition.media.push(...newMedia);
+
+            // Auto-set cover image if not set, using the first available image
+            if (!exhibition.coverImage && exhibition.media.length > 0) {
+                const firstImage = exhibition.media.find(m => m.type === 'image');
+                if (firstImage) {
+                    exhibition.coverImage = firstImage.url;
+                }
+            }
         }
 
         await exhibition.save();

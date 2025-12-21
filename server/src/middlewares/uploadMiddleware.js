@@ -23,7 +23,7 @@ const storage = multer.diskStorage({
 
 // Filters files to allow only supported image, video, and audio formats
 const fileFilter = (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|mp4|webm|mp3|wav|mpeg/;
+    const allowedTypes = /jpeg|jpg|png|gif|mp4|webm|mp3|pdf|wav|mpeg/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype) || file.mimetype.startsWith('video/') || file.mimetype.startsWith('audio/') || file.mimetype.startsWith('image/');
 
