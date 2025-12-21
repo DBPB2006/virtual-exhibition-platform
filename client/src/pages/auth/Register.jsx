@@ -21,7 +21,9 @@ const Register = () => {
         name: '',
         email: '',
         password: '',
-        role: 'visitor'
+        role: 'visitor',
+        profilePicture: null,
+        profilePreview: null
     });
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -39,13 +41,36 @@ const Register = () => {
         setError(null);
     };
 
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setFormData({
+                ...formData,
+                profilePicture: file,
+                profilePreview: URL.createObjectURL(file)
+            });
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
 
         try {
-            await api.post('/api/auth/register', formData);
+            const data = new FormData();
+            data.append('name', formData.name);
+            data.append('email', formData.email);
+            data.append('password', formData.password);
+            data.append('role', formData.role);
+            if (formData.profilePicture) {
+                data.append('profilePicture', formData.profilePicture);
+            }
+
+            await api.post('/api/auth/register', data, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
             // Auto-login logic could go here, but for now we redirect to login
             navigate('/login', { state: { message: "Account created! Please sign in with your new credentials." } });
         } catch (err) {
@@ -118,7 +143,31 @@ const Register = () => {
                             </div>
                         )}
 
-                        <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="space-y-6">
+                            {/* Profile Picture Input */}
+                            <div className="flex flex-col items-center">
+                                <label className="relative cursor-pointer group">
+                                    <div className="w-24 h-24 rounded-full bg-neutral-800 border-2 border-dashed border-neutral-600 flex items-center justify-center overflow-hidden transition-colors group-hover:border-white">
+                                        {formData.profilePreview ? (
+                                            <img src={formData.profilePreview} alt="Preview" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="text-center">
+                                                <FontAwesomeIcon icon={faUser} className="text-2xl text-neutral-500 group-hover:text-white transition-colors" />
+                                                <div className="text-[10px] uppercase mt-1 text-neutral-500 font-bold">Upload</div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <input
+                                        type="file"
+                                        name="profilePicture"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                    />
+                                </label>
+                                <span className="text-xs text-neutral-500 mt-2">Optional Profile Photo</span>
+                            </div>
+
                             <div className="space-y-2">
                                 <label className="text-xs uppercase tracking-widest text-neutral-500 font-bold ml-1">Full Name</label>
                                 <div className="relative group">
@@ -195,7 +244,7 @@ const Register = () => {
                                     </>
                                 )}
                             </button>
-                        </form>
+                        </div>
 
                         <div className="mt-6 flex flex-col items-center gap-4">
                             <div className="flex items-center w-full gap-4">

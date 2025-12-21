@@ -11,4 +11,8 @@ router.get('/me', requireAuthentication, userController.fetchUserProfile);
 
 router.get('/purchases', requireAuthentication, userController.fetchUserPurchaseHistory);
 
+// Update user profile
+const upload = require('../middlewares/uploadMiddleware');
+router.put('/me', requireAuthentication, upload.single('profilePicture'), userController.updateUserProfile);
+
 module.exports = router;

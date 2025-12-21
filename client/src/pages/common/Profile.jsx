@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { logoutUser } from '@/features/auth/authSlice';
+import { logoutUser, setCredentials } from '@/features/auth/authSlice';
 import { Spinner } from '@/components/ui/spinner';
 import { motion } from 'framer-motion';
 import { User, Mail, Calendar, LogOut, Shield, Crown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import api from '@/api/axios';
 
 const ProfileField = ({ label, value, icon: Icon }) => (
     <div className="flex items-center gap-4 py-4 border-b border-neutral-100 last:border-0">
@@ -23,9 +24,60 @@ const ProfileField = ({ label, value, icon: Icon }) => (
 const Profile = () => {
     const navigate = useNavigate();
     const { user } = useSelector((state) => state.auth);
-    // const [loading, setLoading] = useState(false); // Can hook into redux loading state if needed
-
     const dispatch = useDispatch();
+
+    const [isEditing, setIsEditing] = useState(false);
+    const [editForm, setEditForm] = useState({
+        name: '',
+        profilePicture: null,
+        preview: ''
+    });
+    const [saving, setSaving] = useState(false);
+
+    // Initialize form when editing starts
+    const startEditing = () => {
+        setEditForm({
+            name: user.name,
+            profilePicture: null,
+            preview: user.picture || ''
+        });
+        setIsEditing(true);
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setEditForm(prev => ({
+                ...prev,
+                profilePicture: file,
+                preview: URL.createObjectURL(file)
+            }));
+        }
+    };
+
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            const formData = new FormData();
+            formData.append('name', editForm.name);
+            if (editForm.profilePicture) {
+                formData.append('profilePicture', editForm.profilePicture);
+            }
+
+            const res = await api.put('/api/users/me', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            // Update Redux
+            dispatch(setCredentials({ user: res.data.user }));
+            setIsEditing(false);
+        } catch (err) {
+            console.error("Profile Update Error", err);
+            alert("Failed to update profile.");
+        } finally {
+            setSaving(false);
+        }
+    };
 
     const handleLogout = async () => {
         await dispatch(logoutUser());
@@ -70,26 +122,79 @@ const Profile = () => {
                         className="md:col-span-1"
                     >
                         <div className="bg-neutral-50 border border-neutral-100 rounded-2xl p-8 flex flex-col items-center text-center">
-                            <div className="w-32 h-32 rounded-full bg-white border-4 border-white shadow-xl mb-6 flex items-center justify-center text-5xl font-light text-neutral-300 overflow-hidden">
-                                {user.picture ? (
-                                    <img src={user.picture} alt={user.name} className="w-full h-full object-cover" />
-                                ) : (
-                                    user.name.charAt(0).toUpperCase()
-                                )}
-                            </div>
 
-                            <h2 className="text-2xl font-bold mb-1">{user.name}</h2>
+                            {/* Avatar Display / Edit */}
+                            {isEditing ? (
+                                <div className="mb-6 flex flex-col items-center gap-4">
+                                    <label className="relative cursor-pointer group">
+                                        <div className="w-32 h-32 rounded-full bg-white border-4 border-white shadow-xl overflow-hidden">
+                                            {editForm.preview ? (
+                                                <img src={editForm.preview} alt="Profile" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full bg-neutral-100 flex items-center justify-center text-neutral-300 text-4xl">
+                                                    {user.name.charAt(0)}
+                                                </div>
+                                            )}
+                                            {/* Overlay */}
+                                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <span className="text-white text-xs uppercase font-bold tracking-widest">Change</span>
+                                            </div>
+                                        </div>
+                                        <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                                    </label>
+                                </div>
+                            ) : (
+                                <div className="w-32 h-32 rounded-full bg-white border-4 border-white shadow-xl mb-6 flex items-center justify-center text-5xl font-light text-neutral-300 overflow-hidden">
+                                    {user.picture ? (
+                                        <img src={user.picture} alt={user.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        user.name.charAt(0).toUpperCase()
+                                    )}
+                                </div>
+                            )}
+
+                            {isEditing ? (
+                                <div className="w-full space-y-2 mb-6">
+                                    <input
+                                        type="text"
+                                        value={editForm.name}
+                                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                                        className="w-full text-center font-bold text-xl border-b border-neutral-300 pb-1 focus:outline-none focus:border-black bg-transparent"
+                                        placeholder="Your Name"
+                                    />
+                                </div>
+                            ) : (
+                                <h2 className="text-2xl font-bold mb-1">{user.name}</h2>
+                            )}
+
                             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-black text-white text-xs font-bold uppercase tracking-wider rounded-full mb-6">
                                 <RoleIcon className="w-3 h-3" /> {roleLabel}
                             </span>
 
-                            <Button
-                                onClick={handleLogout}
-                                variant="outline"
-                                className="w-full border-neutral-200 hover:bg-white hover:border-red-200 hover:text-red-600 transition-colors"
-                            >
-                                <LogOut className="w-4 h-4 mr-2" /> Sign Out
-                            </Button>
+                            {isEditing ? (
+                                <div className="flex gap-2 w-full">
+                                    <Button onClick={() => setIsEditing(false)} variant="outline" className="flex-1 text-xs" disabled={saving}>Cancel</Button>
+                                    <Button onClick={handleSave} className="flex-1 text-xs" disabled={saving}>
+                                        {saving ? <Spinner className="w-3 h-3" /> : "Save"}
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="w-full space-y-3">
+                                    <Button
+                                        onClick={startEditing}
+                                        className="w-full bg-neutral-900 text-white hover:bg-black"
+                                    >
+                                        Edit Profile
+                                    </Button>
+                                    <Button
+                                        onClick={handleLogout}
+                                        variant="outline"
+                                        className="w-full border-neutral-200 hover:bg-white hover:border-red-200 hover:text-red-600 transition-colors"
+                                    >
+                                        <LogOut className="w-4 h-4 mr-2" /> Sign Out
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     </motion.div>
 

@@ -36,6 +36,10 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+    picture: {
+        type: String,
+        default: ""
+    },
     isActive: {
         type: Boolean,
         default: true

@@ -20,11 +20,20 @@ exports.registerNewUser = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        // Handle Profile Picture
+        let picture = "";
+        if (req.file) {
+            const protocol = req.protocol;
+            const host = req.get('host');
+            picture = `${protocol}://${host}/uploads/${req.file.filename}`;
+        }
+
         const newUser = new User({
             name,
             email,
             password: hashedPassword,
-            role: role || 'visitor'
+            role: role || 'visitor',
+            picture
         });
 
         await newUser.save();

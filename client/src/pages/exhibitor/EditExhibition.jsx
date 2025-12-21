@@ -39,7 +39,8 @@ const EditExhibition = () => {
     // Media State
     const [mediaFiles, setMediaFiles] = useState([]);
     const [mediaPreviews, setMediaPreviews] = useState([]);
-    const [existingMedia, setExistingMedia] = useState([]); // URLs from backend
+    const [existingMedia, setExistingMedia] = useState([]); // Array of media objects { _id, url, type }
+    const [mediaToDelete, setMediaToDelete] = useState([]); // Array of IDs to delete
 
     useEffect(() => {
         const fetchExhibition = async () => {
@@ -65,10 +66,12 @@ const EditExhibition = () => {
                     isOnSale: data.isOnSale || false
                 });
 
-                // Handle existing media (assuming backend returns array of URLs)
-                // For this implementation, we'll treat coverImage as one item if array not abundant
-                if (data.coverImage) {
-                    setExistingMedia([data.coverImage]);
+                // Handle existing media
+                if (data.media && Array.isArray(data.media)) {
+                    setExistingMedia(data.media);
+                } else if (data.coverImage) {
+                    // Fallback for legacy data structure if needed, though media array should exist
+                    setExistingMedia([{ url: data.coverImage, type: 'image', _id: 'legacy_cover' }]);
                 }
 
                 setLoading(false);
@@ -107,12 +110,14 @@ const EditExhibition = () => {
         }
     };
 
-    const removeMedia = (index) => {
-        // Since we have existing and new media, logic depends on UI.
-        // For simplicity reusing component, we only manage NEW uploads here for preview removal.
-        // Existing media removal would require a separate handler if we wanted to delete from server.
+    const removeNewMedia = (index) => {
         setMediaFiles(prev => prev.filter((_, i) => i !== index));
         setMediaPreviews(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const removeExistingMedia = (mediaId) => {
+        setExistingMedia(prev => prev.filter(m => m._id !== mediaId));
+        setMediaToDelete(prev => [...prev, mediaId]);
     };
 
     const handleSubmit = async (e) => {
@@ -129,6 +134,11 @@ const EditExhibition = () => {
             // Append new media
             mediaFiles.forEach(file => {
                 data.append('mediaFiles', file);
+            });
+
+            // Append deleted media IDs
+            mediaToDelete.forEach(id => {
+                data.append('mediaToDelete', id);
             });
 
             await api.put(`/api/exhibitions/${id}`, data, {
@@ -176,21 +186,37 @@ const EditExhibition = () => {
                         {/* Section 2: Visual Media - Mixing Existing and New */}
                         <div className="space-y-4">
                             <h3 className="text-xs font-bold uppercase tracking-widest mb-4">Current Visuals</h3>
-                            {existingMedia.length > 0 ? (
-                                <div className="flex gap-4 mb-8">
-                                    {existingMedia.map((src, i) => (
-                                        <div key={i} className="w-32 h-32 border border-neutral-200">
-                                            <img src={src} alt="Existing" className="w-full h-full object-cover" />
+
+                            {existingMedia.length > 0 && (
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                                    {existingMedia.map((media) => (
+                                        <div key={media._id} className="relative group aspect-square bg-neutral-100 border border-neutral-200">
+                                            {media.type === 'image' ? (
+                                                <img src={media.url} alt="Existing" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <video src={media.url} className="w-full h-full object-cover" controls />
+                                            )}
+
+                                            <button
+                                                type="button"
+                                                onClick={() => removeExistingMedia(media._id)}
+                                                className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                title="Delete this media"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
                                         </div>
                                     ))}
                                 </div>
-                            ) : <p className="text-sm text-neutral-400 italic mb-8">No visuals uploaded yet.</p>}
+                            )}
+
+                            {existingMedia.length === 0 && <p className="text-sm text-neutral-400 italic mb-8">No visuals uploaded yet.</p>}
 
                             <ExhibitionFormMedia
                                 mediaPreviews={mediaPreviews} // Only shows new uploads
                                 mediaFiles={mediaFiles}
                                 handleMediaChange={handleMediaChange}
-                                removeMedia={removeMedia}
+                                removeMedia={removeNewMedia}
                                 isUploading={saving}
                             />
                         </div>

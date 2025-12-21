@@ -145,6 +145,45 @@ exports.updateExhibitDetails = async (req, res) => {
             exhibition.currency = "INR";
         }
 
+        // Handle Media Deletion
+        if (req.body.mediaToDelete) {
+            const toDeleteIds = Array.isArray(req.body.mediaToDelete)
+                ? req.body.mediaToDelete
+                : [req.body.mediaToDelete];
+
+            // 1. Identify files to delete from disk
+            const mediaToDelete = exhibition.media.filter(m => toDeleteIds.includes(m._id.toString()));
+
+            // 2. Remove files from disk
+            const path = require('path');
+            const fs = require('fs');
+
+            mediaToDelete.forEach(media => {
+                try {
+                    // Extract filename from URL
+                    // URL format: http://host/uploads/exhibitions/filename
+                    const filename = media.url.split('/').pop();
+                    if (filename) {
+                        const filePath = path.join(__dirname, '../../uploads/exhibitions', filename);
+                        if (fs.existsSync(filePath)) {
+                            fs.unlinkSync(filePath);
+                        }
+                    }
+                } catch (err) {
+                    console.error(`Failed to delete file for media ${media._id}:`, err);
+                }
+            });
+
+            // 3. Remove from database
+            exhibition.media = exhibition.media.filter(m => !toDeleteIds.includes(m._id.toString()));
+
+            // 4. Reset cover image if it was deleted
+            const deletedUrls = mediaToDelete.map(m => m.url);
+            if (deletedUrls.includes(exhibition.coverImage)) {
+                exhibition.coverImage = ""; // Will be reset below if other media exists
+            }
+        }
+
         // Handle New Media Uploads (if any)
         if (req.files && req.files.length > 0) {
             const protocol = req.protocol;
@@ -164,13 +203,13 @@ exports.updateExhibitDetails = async (req, res) => {
             });
 
             exhibition.media.push(...newMedia);
+        }
 
-            // Auto-set cover image if not set, using the first available image
-            if (!exhibition.coverImage && exhibition.media.length > 0) {
-                const firstImage = exhibition.media.find(m => m.type === 'image');
-                if (firstImage) {
-                    exhibition.coverImage = firstImage.url;
-                }
+        // Auto-set cover image if not set, using the first available image
+        if (!exhibition.coverImage && exhibition.media.length > 0) {
+            const firstImage = exhibition.media.find(m => m.type === 'image');
+            if (firstImage) {
+                exhibition.coverImage = firstImage.url;
             }
         }
 
