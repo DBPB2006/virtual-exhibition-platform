@@ -58,7 +58,7 @@ export const NotificationProvider = ({ children }) => {
         if (user) {
             fetchNotifications(true);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, [user]);
 
     // Polling Mechanism (Every 15s)
