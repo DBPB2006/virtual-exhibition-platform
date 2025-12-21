@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
-import Logo from '../../assets/virtual_exhibit_logo.png';
+import Logo from '../../assets/loader_new.jpg';
 
 // Displays a full-screen animated loading screen with a progress indicator and logo
 const Loader = ({ isLoading }) => {
