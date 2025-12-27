@@ -3,7 +3,8 @@ import api from '@/api/axios';
 import { Spinner } from '@/components/ui/spinner';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Ban, CheckCircle, Trash2, Shield, User as UserIcon, ShieldAlert, ArrowRight } from 'lucide-react';
+import { ArrowLeft, Ban, CheckCircle, Trash2, Shield, User as UserIcon, ShieldAlert, ArrowRight, Check } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import gsap from 'gsap';
 
 // Provides an interface for managing users, allowing administrators to update roles, change statuses, or delete accounts
@@ -12,6 +13,8 @@ const AdminUsers = () => {
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const [searchParams] = useSearchParams();
+    const filter = searchParams.get('filter');
     const containerRef = useRef(null);
 
     const fetchUsers = async () => {
@@ -63,6 +66,18 @@ const AdminUsers = () => {
             return () => ctx.revert();
         }
     }, [loading]);
+
+    const handleApproveExhibitor = async (id) => {
+        if (!window.confirm("Approve this exhibitor account? They will be able to log in immediately.")) return;
+        try {
+            await api.patch(`/api/admin/users/${id}/approve`);
+            setUsers(prev => prev.map(u => u._id === id ? { ...u, status: 'active' } : u));
+            alert("Exhibitor approved.");
+        } catch (err) {
+            console.error(err);
+            alert("Failed to approve. " + (err.response?.data?.message || ""));
+        }
+    };
 
     const handleUpdateRole = async (id, newRole) => {
         if (!window.confirm(`Are you sure you want to change this user's role to ${newRole}? They will be required to re-login.`)) return;
@@ -124,10 +139,16 @@ const AdminUsers = () => {
         }
     };
 
-    const filteredUsers = users.filter(user =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredUsers = users.filter(user => {
+        const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.email.toLowerCase().includes(searchTerm.toLowerCase());
+
+        if (filter === 'pending') {
+            return matchesSearch && user.role === 'exhibitor' && user.status === 'pending';
+        }
+
+        return matchesSearch;
+    });
 
     if (loading) return <div className="h-screen flex items-center justify-center"><Spinner /></div>;
 
@@ -241,25 +262,42 @@ const AdminUsers = () => {
                                             </span>
                                         </div>
                                         <div className="w-1/6">
-                                            <span className={`text-[10px] uppercase font-bold tracking-widest ${isActive ? 'text-green-600' : 'text-red-600 line-through'}`}>
-                                                {isActive ? 'ACTIVE' : 'DISABLED'}
-                                            </span>
+                                            {user.status === 'pending' ? (
+                                                <span className="text-[10px] uppercase font-bold tracking-widest text-yellow-600 animate-pulse">
+                                                    PENDING
+                                                </span>
+                                            ) : (
+                                                <span className={`text-[10px] uppercase font-bold tracking-widest ${isActive ? 'text-green-600' : 'text-red-600 line-through'}`}>
+                                                    {isActive ? 'ACTIVE' : 'DISABLED'}
+                                                </span>
+                                            )}
                                         </div>
                                         <div className="w-1/3 flex justify-end gap-4 opacity-10 md:opacity-0 group-hover:opacity-100 transition-opacity">
                                             {!isAdmin && (
                                                 <>
-                                                    <button
-                                                        onClick={() => handleUpdateRole(user._id, isExhibitor ? 'visitor' : 'exhibitor')}
-                                                        className="text-[10px] font-bold uppercase tracking-widest hover:underline"
-                                                    >
-                                                        {isExhibitor ? 'Demote' : 'Promote'}
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleToggleStatus(user._id, isActive)}
-                                                        className={`text-[10px] font-bold uppercase tracking-widest hover:underline ${!isActive ? 'text-black' : 'text-neutral-500'}`}
-                                                    >
-                                                        {isActive ? 'Disable' : 'Enable'}
-                                                    </button>
+                                                    {user.status === 'pending' && user.role === 'exhibitor' ? (
+                                                        <button
+                                                            onClick={() => handleApproveExhibitor(user._id)}
+                                                            className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-green-600 hover:text-green-500 hover:underline"
+                                                        >
+                                                            <Check className="w-3 h-3" /> Approve
+                                                        </button>
+                                                    ) : (
+                                                        <>
+                                                            <button
+                                                                onClick={() => handleUpdateRole(user._id, isExhibitor ? 'visitor' : 'exhibitor')}
+                                                                className="text-[10px] font-bold uppercase tracking-widest hover:underline"
+                                                            >
+                                                                {isExhibitor ? 'Demote' : 'Promote'}
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleToggleStatus(user._id, isActive)}
+                                                                className={`text-[10px] font-bold uppercase tracking-widest hover:underline ${!isActive ? 'text-black' : 'text-neutral-500'}`}
+                                                            >
+                                                                {isActive ? 'Disable' : 'Enable'}
+                                                            </button>
+                                                        </>
+                                                    )}
                                                     <button
                                                         onClick={() => handleDelete(user._id)}
                                                         className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 hover:text-black hover:underline"

@@ -259,4 +259,37 @@ router.patch('/requests/:id/process', async (req, res) => {
     }
 });
 
+// Retrieves pending exhibitor users
+router.get('/pending-exhibitors', async (req, res) => {
+    try {
+        const pendingUsers = await User.find({ role: 'exhibitor', status: 'pending', isDeleted: false })
+            .select('-password -__v')
+            .sort({ createdAt: -1 });
+        res.json(pendingUsers);
+    } catch (error) {
+        console.error("Admin Pending Exhibitors Error:", error);
+        res.status(500).json({ message: "Server error fetching pending exhibitors" });
+    }
+});
+
+// Approves a pending exhibitor
+router.patch('/users/:id/approve', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        if (user.role !== 'exhibitor' || user.status !== 'pending') {
+            return res.status(400).json({ message: "User is not a pending exhibitor" });
+        }
+
+        user.status = 'active';
+        await user.save();
+
+        res.json({ message: "Exhibitor approved successfully", user });
+    } catch (error) {
+        console.error("Admin Approve Exhibitor Error:", error);
+        res.status(500).json({ message: "Server error approving exhibitor" });
+    }
+});
+
 module.exports = router;

@@ -12,9 +12,13 @@ const requireAuthentication = async (req, res, next) => {
             }
 
             if (!user.isActive) {
-
                 req.session.destroy();
                 return res.status(403).json({ message: "Account disabled" });
+            }
+
+            if (user.role === 'exhibitor' && user.status === 'pending') {
+                req.session.destroy();
+                return res.status(403).json({ message: "Your exhibitor account is pending admin approval." });
             }
 
             req.user = user;

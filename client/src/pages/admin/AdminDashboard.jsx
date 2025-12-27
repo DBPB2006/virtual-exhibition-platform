@@ -140,6 +140,27 @@ const AdminDashboard = () => {
                     </div>
                 </div>
 
+                {/* 4. Pending Exhibitor Approvals */}
+                {/* We'll fetch this on demand or here. For now, let's add a button to view waiting list */}
+                <div className="mt-12 mb-24">
+                    <h2 className="text-2xl font-light mb-6 flex items-center gap-3">
+                        <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
+                        Pending Approvals
+                    </h2>
+                    <div className="bg-neutral-50 border border-black/5 p-6 rounded-xl flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-neutral-500 mb-1">Exhibitor Access Requests</p>
+                            <p className="font-bold text-lg">Review pending exhibitor applications</p>
+                        </div>
+                        <button
+                            onClick={() => navigate('/dashboard/admin/users?filter=pending')}
+                            className="px-6 py-3 bg-black text-white text-xs font-bold uppercase tracking-widest hover:bg-neutral-800 transition-colors flex items-center gap-2"
+                        >
+                            Review Applications <ArrowUpRight className="w-4 h-4 ml-1" />
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </div>
     );

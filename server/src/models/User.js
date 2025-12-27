@@ -51,6 +51,15 @@ const userSchema = new mongoose.Schema({
     isDeleted: {
         type: Boolean,
         default: false
+    },
+    status: {
+        type: String,
+        enum: ['active', 'pending'],
+        default: 'active'
+    },
+    isEmailVerified: {
+        type: Boolean,
+        default: false
     }
 });
 

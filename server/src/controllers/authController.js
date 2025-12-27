@@ -2,11 +2,33 @@ const bcrypt = require('bcryptjs');
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 
+const VerificationCode = require('../models/VerificationCode');
+
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+async function verifyRecaptcha(token) {
+    if (!token) return false;
+    const secret = process.env.RECAPTCHA_SECRET_KEY;
+    if (!secret) {
+        console.warn("RECAPTCHA_SECRET_KEY not set. Skipping verification (DEV MODE).");
+        return true;
+    }
+    const response = await fetch(`https://www.google.com/recaptcha/api/siteverify?secret=${secret}&response=${token}`, {
+        method: 'POST'
+    });
+    const data = await response.json();
+    return data.success;
+}
 
 exports.registerNewUser = async (req, res) => {
     try {
-        const { name, email, password, role } = req.body;
+        const { name, email, password, role, verificationCode, captchaToken, tncAccepted } = req.body;
+
+        // Captcha Verification
+        const isCaptchaValid = await verifyRecaptcha(captchaToken);
+        if (!isCaptchaValid) {
+            return res.status(400).json({ message: 'Captcha verification failed' });
+        }
 
         if (!name || !email || !password) {
             return res.status(400).json({ message: 'Please provide all required fields' });
@@ -28,11 +50,35 @@ exports.registerNewUser = async (req, res) => {
             picture = `${protocol}://${host}/uploads/${req.file.filename}`;
         }
 
+        // Role & Status Logic
+        const targetRole = role === 'exhibitor' ? 'exhibitor' : 'visitor';
+        let status = 'active';
+
+        if (targetRole === 'exhibitor') {
+            if (tncAccepted !== true && tncAccepted !== 'true') {
+                return res.status(400).json({ message: 'Terms and Conditions must be accepted' });
+            }
+            // Verify Email Code
+            if (!verificationCode) {
+                return res.status(400).json({ message: 'Email verification code required for exhibitors' });
+            }
+            const record = await VerificationCode.findOne({ email });
+            if (!record || record.code !== verificationCode.toUpperCase()) {
+                return res.status(400).json({ message: 'Invalid or expired verification code' });
+            }
+            // Delete used code
+            await VerificationCode.deleteOne({ email });
+
+            status = 'pending';
+        }
+
         const newUser = new User({
             name,
             email,
             password: hashedPassword,
-            role: role || 'visitor',
+            role: targetRole,
+            status: status,
+            isEmailVerified: targetRole === 'exhibitor', // Local exhibitors verified by code
             picture
         });
 
@@ -61,6 +107,10 @@ exports.authenticateUser = async (req, res) => {
 
         if (user.isBlocked) {
             return res.status(403).json({ message: 'Account is blocked. Contact support.' });
+        }
+
+        if (user.role === 'exhibitor' && user.status === 'pending') {
+            return res.status(403).json({ message: 'Your exhibitor account is pending admin approval.' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
@@ -101,7 +151,13 @@ exports.authenticateUser = async (req, res) => {
 
 exports.googleRegister = async (req, res) => {
     try {
-        const { token, role } = req.body;
+        const { token, role, captchaToken, tncAccepted } = req.body;
+
+        // Captcha Verification
+        const isCaptchaValid = await verifyRecaptcha(captchaToken);
+        if (!isCaptchaValid) {
+            return res.status(400).json({ message: 'Captcha verification failed' });
+        }
 
         if (!token) {
             return res.status(400).json({ message: 'No token provided' });
@@ -127,16 +183,33 @@ exports.googleRegister = async (req, res) => {
         // Create New User
         // STRICT: Allow only 'visitor' or 'exhibitor'
         const allocatedRole = (role === 'exhibitor') ? 'exhibitor' : 'visitor';
+        let status = 'active';
+
+        if (allocatedRole === 'exhibitor') {
+            if (tncAccepted !== true) {
+                return res.status(400).json({ message: 'Terms and Conditions must be accepted' });
+            }
+            status = 'pending';
+        }
 
         const newUser = new User({
             name,
             email,
             authProvider: 'google',
             googleId,
-            role: allocatedRole
+            role: allocatedRole,
+            status: status,
+            isEmailVerified: true // Google users are implicitly email verified
         });
 
         await newUser.save();
+
+        if (status === 'pending') {
+            return res.status(201).json({
+                message: 'Account created. Pending Admin Approval.',
+                user: { role: 'exhibitor', status: 'pending' }
+            });
+        }
 
         // Create Session
         createSession(req, res, newUser, 'Google Registration Success');
@@ -180,6 +253,10 @@ exports.googleLogin = async (req, res) => {
         // Security Checks
         if (user.isBlocked) return res.status(403).json({ message: 'Account is blocked.' });
         if (user.isDeleted) return res.status(403).json({ message: 'Account deleted.' });
+
+        if (user.role === 'exhibitor' && user.status === 'pending') {
+            return res.status(403).json({ message: 'Your exhibitor account is pending admin approval.' });
+        }
 
         // Link Google ID if missing (seamless integration for email-registered users)
         if (!user.googleId) {

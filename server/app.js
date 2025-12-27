@@ -28,7 +28,7 @@ const sessionMiddleware = session({
     }),
     cookie: {
         httpOnly: true,
-        secure: false, 
+        secure: false,
         maxAge: 1000 * 60 * 60 * 24 // 1 day
     }
 });
@@ -49,6 +49,7 @@ app.use('/api/exhibitor', require('./src/routes/exhibitorRoutes'));
 app.use('/api/notifications', require('./src/routes/notificationRoutes'));
 app.use('/api/admin', require('./src/routes/adminRoutes'));
 app.use('/api/contact', require('./src/routes/contactRoutes'));
+app.use('/api/verification', require('./src/routes/verificationRoutes'));
 
 app.get('/health', (req, res) => {
     res.json({ status: "Server is running" });

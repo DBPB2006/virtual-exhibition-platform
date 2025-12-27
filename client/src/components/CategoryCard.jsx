@@ -17,7 +17,7 @@ const CategoryCard = ({ category, description, exhibitions = [], count = 0 }) =>
     return (
         <div
             onClick={handleClick}
-            className="group relative flex flex-col justify-between h-[480px] p-10 bg-white transition-all duration-500 ease-out cursor-pointer overflow-hidden border-t border-gray-100 hover:border-black"
+            className="group relative flex flex-col justify-between h-120 p-10 bg-white transition-all duration-500 ease-out cursor-pointer overflow-hidden border-t border-gray-100 hover:border-black"
         >
             <div className="absolute inset-0 bg-neutral-900 translate-y-full transition-transform duration-500 ease-[0.22,1,0.36,1] group-hover:translate-y-0 z-0" />
 
@@ -47,7 +47,7 @@ const CategoryCard = ({ category, description, exhibitions = [], count = 0 }) =>
                     {exhibitions.slice(0, 3).map((exh, idx) => (
                         <div
                             key={exh._id || idx}
-                            className="relative w-1/3 aspect-[3/4] bg-neutral-800 overflow-hidden"
+                            className="relative w-1/3 aspect-3/4 bg-neutral-800 overflow-hidden"
                             style={{ transitionDelay: `${idx * 50}ms` }}
                         >
                             {exh.coverImage ? (
