@@ -76,6 +76,22 @@ app.get('/health', (req, res) => {
     res.json({ status: "Server is running" });
 });
 
+// Multer / Cloudinary upload error handler
+// Must have 4 args to be recognised by Express as an error handler
+app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
+    if (err && err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(413).json({ message: 'File too large. Maximum size is 100MB.' });
+    }
+    if (err && err.message && err.message.includes('File type not supported')) {
+        return res.status(415).json({ message: err.message });
+    }
+    if (err) {
+        console.error('[Express Error Handler]', err.message || err);
+        return res.status(500).json({ message: err.message || 'Server error' });
+    }
+    next();
+});
+
 // Fallback: JSON 404 for unmatched API routes (frontend is deployed separately on Vercel)
 app.use((req, res) => {
     res.status(404).json({ message: 'Route not found' });

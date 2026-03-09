@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
     },
     authProvider: {
         type: String,
-        enum: ['local', 'google'],
+        enum: ['local', 'google', 'mixed'],
         default: 'local'
     },
     role: {
@@ -54,7 +54,7 @@ const userSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['active', 'pending'],
+        enum: ['active', 'pending', 'blocked', 'deleted'],
         default: 'active'
     },
     isEmailVerified: {
