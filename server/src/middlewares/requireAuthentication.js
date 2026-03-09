@@ -11,13 +11,13 @@ const requireAuthentication = async (req, res, next) => {
                 return res.status(401).json({ message: 'User no longer exists' });
             }
 
-            if (!user.isActive) {
+            if (user.isActive === false) {
+                console.warn(`[AUTH] Access denied for deactivated user: ${user.email}`);
                 req.session.destroy();
                 return res.status(403).json({ message: "Account disabled" });
             }
 
             if (user.role === 'exhibitor' && user.status === 'pending') {
-                req.session.destroy();
                 return res.status(403).json({ message: "Your exhibitor account is pending admin approval." });
             }
 
