@@ -58,9 +58,7 @@ exports.updateUserProfile = async (req, res) => {
 
         // Handle Profile Picture Upload
         if (req.file) {
-            const protocol = req.protocol;
-            const host = req.get('host');
-            user.picture = `${protocol}://${host}/uploads/${req.file.filename}`;
+            user.picture = req.file.path; // Cloudinary URL
         }
 
         await user.save();

@@ -12,6 +12,7 @@
     "license": "ISC",
     "dependencies": {
         "bcryptjs": "^3.0.3",
+        "cloudinary": "^1.41.3",
         "connect-mongo": "^6.0.0",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",
@@ -21,7 +22,8 @@
         "google-auth-library": "^10.5.0",
         "mongodb": "^7.1.0",
         "mongoose": "^8.9.2",
-        "multer": "^2.0.2",
+        "multer": "^2.1.1",
+        "multer-storage-cloudinary": "^4.0.0",
         "nodemailer": "^7.0.12",
         "razorpay": "^2.9.6",
         "socket.io": "^4.8.1"

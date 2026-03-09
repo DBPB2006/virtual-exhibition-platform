@@ -24,11 +24,8 @@ exports.createExhibitListing = async (req, res) => {
         let coverImage = "";
 
         if (req.files && req.files.length > 0) {
-            const protocol = req.protocol;
-            const host = req.get('host');
-
             media = req.files.map(file => {
-                const fileUrl = `${protocol}://${host}/uploads/exhibitions/${file.filename}`;
+                const fileUrl = file.path; // Cloudinary URL
                 let type = 'image';
                 if (file.mimetype.startsWith('video/')) type = 'video';
                 if (file.mimetype.startsWith('audio/')) type = 'audio';
@@ -36,7 +33,8 @@ exports.createExhibitListing = async (req, res) => {
                 return {
                     url: fileUrl,
                     type: type,
-                    originalName: file.originalname
+                    originalName: file.originalname,
+                    public_id: file.filename // Store public_id if needed for deletion later
                 };
             });
 
@@ -154,23 +152,22 @@ exports.updateExhibitDetails = async (req, res) => {
             // 1. Identify files to delete from disk
             const mediaToDelete = exhibition.media.filter(m => toDeleteIds.includes(m._id.toString()));
 
-            // 2. Remove files from disk
-            const path = require('path');
-            const fs = require('fs');
+            const { cloudinary } = require('../config/cloudinary');
 
-            mediaToDelete.forEach(media => {
+            mediaToDelete.forEach(async (media) => {
                 try {
-                    // Extract filename from URL
-                    // URL format: http://host/uploads/exhibitions/filename
-                    const filename = media.url.split('/').pop();
-                    if (filename) {
-                        const filePath = path.join(__dirname, '../../uploads/exhibitions', filename);
-                        if (fs.existsSync(filePath)) {
-                            fs.unlinkSync(filePath);
-                        }
-                    }
+                    // Delete from Cloudinary
+                    // We should store public_id, but if we don't have it, we can extract from URL
+                    const publicId = media.public_id || media.url.split('/').pop().split('.')[0];
+                    const folder = media.type === 'image' ? 'virtual-gallery/exhibitions' : 'virtual-gallery/exhibitions'; // Simplified
+
+                    // Note: In Cloudinary, publicId often includes the folder path if not stripped
+                    // For now, if we match the upload pattern:
+                    const fullPublicId = media.public_id || `virtual-gallery/exhibitions/${media.url.split('/').pop().split('.')[0]}`;
+
+                    await cloudinary.uploader.destroy(fullPublicId, { resource_type: media.type === 'video' ? 'video' : 'image' });
                 } catch (err) {
-                    console.error(`Failed to delete file for media ${media._id}:`, err);
+                    console.error(`Failed to delete Cloudinary asset for media ${media._id}:`, err);
                 }
             });
 
@@ -253,11 +250,8 @@ exports.uploadExhibitMedia = async (req, res) => {
             return res.status(400).json({ message: "No files provided" });
         }
 
-        const protocol = req.protocol;
-        const host = req.get('host');
-
         const newMediaItems = req.files.map(file => {
-            const fileUrl = `${protocol}://${host}/uploads/exhibitions/${file.filename}`;
+            const fileUrl = file.path; // Cloudinary URL
 
             let type = 'image';
             if (file.mimetype.startsWith('video/')) type = 'video';
@@ -266,7 +260,8 @@ exports.uploadExhibitMedia = async (req, res) => {
             return {
                 url: fileUrl,
                 type: type,
-                originalName: file.originalname
+                originalName: file.originalname,
+                public_id: file.filename
             };
         });
 
@@ -314,17 +309,13 @@ exports.removeExhibitMedia = async (req, res) => {
             return res.status(404).json({ message: "Media item not found" });
         }
 
-        // 1. Remove file from filesystem (Best effort)
+        // 1. Remove from Cloudinary (Best effort)
         try {
-            const relativePath = mediaItem.url.split('/uploads/')[1];
-            if (relativePath) {
-                const filePath = path.join(__dirname, '../../uploads/', relativePath);
-                if (fs.existsSync(filePath)) {
-                    fs.unlinkSync(filePath);
-                }
-            }
+            const { cloudinary } = require('../config/cloudinary');
+            const fullPublicId = mediaItem.public_id || `virtual-gallery/exhibitions/${mediaItem.url.split('/').pop().split('.')[0]}`;
+            await cloudinary.uploader.destroy(fullPublicId, { resource_type: mediaItem.type === 'video' ? 'video' : 'image' });
         } catch (err) {
-            console.error(`[WARN] Failed to delete file: ${err.message}`);
+            console.error(`[WARN] Failed to delete Cloudinary asset: ${err.message}`);
         }
 
         // 2. Remove from array

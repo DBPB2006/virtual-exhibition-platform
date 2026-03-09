@@ -61,6 +61,17 @@ app.use('/api/admin', require('./src/routes/adminRoutes'));
 app.use('/api/contact', require('./src/routes/contactRoutes'));
 app.use('/api/verification', require('./src/routes/verificationRoutes'));
 
+// Session Debug Endpoint
+app.get('/api/session-debug', (req, res) => {
+    res.json({
+        sessionId: req.sessionID,
+        hasUser: !!req.session.user,
+        user: req.session.user || null,
+        cookie: req.session.cookie,
+        headers: req.headers['cookie'] ? 'Cookie present' : 'No cookie header'
+    });
+});
+
 app.get('/health', (req, res) => {
     res.json({ status: "Server is running" });
 });

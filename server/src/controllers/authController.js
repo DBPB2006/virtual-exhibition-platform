@@ -45,9 +45,7 @@ exports.registerNewUser = async (req, res) => {
         // Handle Profile Picture
         let picture = "";
         if (req.file) {
-            const protocol = req.protocol;
-            const host = req.get('host');
-            picture = `${protocol}://${host}/uploads/${req.file.filename}`;
+            picture = req.file.path; // Cloudinary URL
         }
 
         // Role & Status Logic

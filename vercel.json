@@ -1,0 +1,8 @@
+{
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "https://virtual-exhibition-platform.vercel.app/index.html"
+        }
+    ]
+}
