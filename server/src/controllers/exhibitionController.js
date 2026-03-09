@@ -69,7 +69,6 @@ exports.createExhibitListing = async (req, res) => {
             referenceCurrency,
             priceINR,
             transactionCurrency: finalTransactionCurrency,
-            price: priceINR,
             currency: "INR",
             createdBy: req.user.id
         });
@@ -139,8 +138,6 @@ exports.updateExhibitDetails = async (req, res) => {
             exhibition.referenceCurrency = "INR";
             exhibition.priceINR = newPrice;
             exhibition.transactionCurrency = "INR";
-            exhibition.price = newPrice;
-            exhibition.currency = "INR";
         }
 
         // Handle Media Deletion
@@ -154,22 +151,15 @@ exports.updateExhibitDetails = async (req, res) => {
 
             const { cloudinary } = require('../config/cloudinary');
 
-            mediaToDelete.forEach(async (media) => {
+            // Use Promise.all to properly await all Cloudinary deletions
+            await Promise.all(mediaToDelete.map(async (media) => {
                 try {
-                    // Delete from Cloudinary
-                    // We should store public_id, but if we don't have it, we can extract from URL
-                    const publicId = media.public_id || media.url.split('/').pop().split('.')[0];
-                    const folder = media.type === 'image' ? 'virtual-gallery/exhibitions' : 'virtual-gallery/exhibitions'; // Simplified
-
-                    // Note: In Cloudinary, publicId often includes the folder path if not stripped
-                    // For now, if we match the upload pattern:
                     const fullPublicId = media.public_id || `virtual-gallery/exhibitions/${media.url.split('/').pop().split('.')[0]}`;
-
                     await cloudinary.uploader.destroy(fullPublicId, { resource_type: media.type === 'video' ? 'video' : 'image' });
                 } catch (err) {
                     console.error(`Failed to delete Cloudinary asset for media ${media._id}:`, err);
                 }
-            });
+            }));
 
             // 3. Remove from database
             exhibition.media = exhibition.media.filter(m => !toDeleteIds.includes(m._id.toString()));
@@ -183,11 +173,8 @@ exports.updateExhibitDetails = async (req, res) => {
 
         // Handle New Media Uploads (if any)
         if (req.files && req.files.length > 0) {
-            const protocol = req.protocol;
-            const host = req.get('host');
-
             const newMedia = req.files.map(file => {
-                const fileUrl = `${protocol}://${host}/uploads/exhibitions/${file.filename}`;
+                const fileUrl = file.path; // Cloudinary URL
                 let type = 'image';
                 if (file.mimetype.startsWith('video/')) type = 'video';
                 if (file.mimetype.startsWith('audio/')) type = 'audio';
@@ -195,7 +182,8 @@ exports.updateExhibitDetails = async (req, res) => {
                 return {
                     url: fileUrl,
                     type: type,
-                    originalName: file.originalname
+                    originalName: file.originalname,
+                    public_id: file.filename // Cloudinary public_id for deletion
                 };
             });
 
@@ -409,12 +397,12 @@ exports.viewExhibitDetails = async (req, res) => {
             return res.json(exhibition);
         }
 
-        // Owner Access
-        if (exhibition.createdBy._id.toString() !== req.session.user.id) {
-            return res.status(403).json({ message: "Not authorized to view this item" });
+        // Owner Access: only the owner can see their own draft/unpublished exhibition
+        if (exhibition.createdBy._id.toString() === req.session.user.id) {
+            return res.json(exhibition);
         }
 
-        res.json(exhibition);
+        return res.status(403).json({ message: "Not authorized to view this item" });
 
     } catch (error) {
         console.error(`[ERROR][ExhibitionController] View Details: ${error.message}`);

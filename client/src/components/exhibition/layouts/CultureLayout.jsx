@@ -4,6 +4,14 @@ import { Navbar } from '@/components/common/Navbar';
 import { ArrowLeft } from 'lucide-react';
 import PurchaseButton from '../PurchaseButton';
 
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+const getMediaUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 // Renders the exhibition detail view for the 'Culture & Heritage' category, featuring earthy tones and texture overlays
 const CultureLayout = ({ exhibition, isOwner, hasAccess }) => (
     <div className="min-h-screen bg-[#1C1917] text-[#D6D3D1] font-sans relative">
@@ -25,7 +33,7 @@ const CultureLayout = ({ exhibition, isOwner, hasAccess }) => (
                     <div className="relative bg-[#292524] p-2 border border-[#44403C] shadow-2xl">
                         <div className="aspect-[3/4] overflow-hidden grayscale-[20%] group-hover:grayscale-0 transition-all duration-700">
                             {exhibition.coverImage ? (
-                                <img src={exhibition.coverImage} alt={exhibition.title} className="w-full h-full object-cover" />
+                                <img src={getMediaUrl(exhibition.coverImage)} alt={exhibition.title} className="w-full h-full object-cover" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-[#1C1917] text-[#57534E] font-serif italic">
                                     [ Artifact Visual Missing ]

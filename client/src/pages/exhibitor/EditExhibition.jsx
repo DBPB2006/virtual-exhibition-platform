@@ -7,6 +7,14 @@ import { ArrowLeft, Save, X, Upload } from 'lucide-react';
 import api from '@/api/axios';
 import gsap from 'gsap';
 
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+const getMediaUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 // Import Form Components
 import ExhibitionFormCore from '@/components/exhibition/form/ExhibitionFormCore';
 import ExhibitionFormMedia from '@/components/exhibition/form/ExhibitionFormMedia';
@@ -192,9 +200,9 @@ const EditExhibition = () => {
                                     {existingMedia.map((media) => (
                                         <div key={media._id} className="relative group aspect-square bg-neutral-100 border border-neutral-200">
                                             {media.type === 'image' ? (
-                                                <img src={media.url} alt="Existing" className="w-full h-full object-cover" />
+                                                <img src={getMediaUrl(media.url)} alt="Existing" className="w-full h-full object-cover" />
                                             ) : (
-                                                <video src={media.url} className="w-full h-full object-cover" controls />
+                                                <video src={getMediaUrl(media.url)} className="w-full h-full object-cover" controls />
                                             )}
 
                                             <button

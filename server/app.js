@@ -76,11 +76,9 @@ app.get('/health', (req, res) => {
     res.json({ status: "Server is running" });
 });
 
-const path = require('path');
-app.use(express.static(path.join(__dirname, '../client/dist')));
-
-app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../client', 'dist', 'index.html'));
+// Fallback: JSON 404 for unmatched API routes (frontend is deployed separately on Vercel)
+app.use((req, res) => {
+    res.status(404).json({ message: 'Route not found' });
 });
 
 module.exports = app;

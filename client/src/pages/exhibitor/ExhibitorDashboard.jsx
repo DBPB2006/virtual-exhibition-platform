@@ -10,6 +10,13 @@ import {
     Search
 } from 'lucide-react';
 
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const getMediaUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 // Displays the main exhibitor dashboard with high-level metrics (total, live, pending, drafts, value) and quick actions
 const ExhibitorDashboard = () => {
     const navigate = useNavigate();
@@ -179,7 +186,7 @@ const ExhibitorDashboard = () => {
                                     <div className="w-1/3 flex items-center gap-6">
                                         <div className="h-16 w-12 bg-neutral-100 overflow-hidden relative">
                                             {ex.coverImage && (
-                                                <img src={ex.coverImage} alt="" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all" />
+                                                <img src={getMediaUrl(ex.coverImage)} alt="" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all" />
                                             )}
                                         </div>
                                         <div>

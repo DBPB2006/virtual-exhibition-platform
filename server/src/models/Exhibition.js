@@ -86,7 +86,8 @@ const exhibitionSchema = new mongoose.Schema(
                 enum: ['image', 'video', 'audio'],
                 required: true
             },
-            originalName: String
+            originalName: String,
+            public_id: String   // Cloudinary public_id for deletion
         }],
 
         // Verification System: Defines the approval status by admins

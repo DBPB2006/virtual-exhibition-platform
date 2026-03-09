@@ -5,6 +5,14 @@ import { ArrowLeft, Box } from 'lucide-react';
 import { motion } from 'framer-motion';
 import PurchaseButton from '../PurchaseButton';
 
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+const getMediaUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 // Renders the exhibition detail view for the 'Historic & Antique' category, featuring gold accents and classical styling
 const HistoricLayout = ({ exhibition, isOwner, hasAccess }) => (
     <div className="min-h-screen bg-[#080808] text-[#EFE6D8] font-sans relative overflow-hidden selection:bg-[#D4AF37] selection:text-black">
@@ -31,7 +39,7 @@ const HistoricLayout = ({ exhibition, isOwner, hasAccess }) => (
                         <div className="absolute -inset-[1px] bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent opacity-50 blur-sm animate-border-flow pointer-events-none" />
 
                         {exhibition.coverImage ? (
-                            <img src={exhibition.coverImage} alt={exhibition.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
+                            <img src={getMediaUrl(exhibition.coverImage)} alt={exhibition.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-[#333]">
                                 <Box className="w-12 h-12 opacity-20" />

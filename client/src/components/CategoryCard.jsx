@@ -3,6 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const getMediaUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 // Displays a clickable card for a specific category, showing a preview of exhibitions and facilitating navigation
 const CategoryCard = ({ category, description, exhibitions = [], count = 0 }) => {
     const navigate = useNavigate();
@@ -52,7 +59,7 @@ const CategoryCard = ({ category, description, exhibitions = [], count = 0 }) =>
                         >
                             {exh.coverImage ? (
                                 <img
-                                    src={exh.coverImage.startsWith('http') ? exh.coverImage : `http://localhost:5050${exh.coverImage}`}
+                                    src={getMediaUrl(exh.coverImage)}
                                     alt={exh.title}
                                     className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700 ease-out"
                                 />

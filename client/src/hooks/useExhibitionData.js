@@ -26,10 +26,12 @@ export const useExhibitionData = (categoryMatchers = []) => {
                         ...item,
                         id: item._id,
                         theme: item.category,
-                        // Robust Image Handling
-                        coverImage: item.coverImage && item.coverImage.startsWith('http')
-                            ? item.coverImage
-                            : "", // No fallback, just empty
+                        // Robust Image Handling: use getMediaUrl to support both Cloudinary and local paths
+                        coverImage: item.coverImage
+                            ? (item.coverImage.startsWith('http')
+                                ? item.coverImage
+                                : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${item.coverImage.startsWith('/') ? '' : '/'}${item.coverImage}`)
+                            : "",
                         startDate: item.createdAt ? new Date(item.createdAt).getFullYear() : "2024",
                         exhibitor: item.createdBy?.name || "Curator", // Real Author
                         isForSale: item.isForSale,

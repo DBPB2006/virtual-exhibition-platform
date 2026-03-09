@@ -4,6 +4,14 @@ import { Navbar } from '@/components/common/Navbar';
 import { ArrowLeft } from 'lucide-react';
 import PurchaseButton from '../PurchaseButton';
 
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+const getMediaUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 // Renders the exhibition detail view for the 'Science & Technology' category, featuring futuristic cyber-aesthetic styling
 const ScienceLayout = ({ exhibition, isOwner, hasAccess }) => (
     <div className="min-h-screen bg-[#020617] text-slate-300 font-sans relative overflow-hidden">
@@ -45,7 +53,7 @@ const ScienceLayout = ({ exhibition, isOwner, hasAccess }) => (
                         <div className="absolute inset-0 bg-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                         <div className="absolute top-0 left-0 w-full h-[1px] bg-cyan-400 animate-[scan_3s_linear_infinite] shadow-[0_0_15px_rgba(6,182,212,0.8)]" />
                         {exhibition.coverImage ? (
-                            <img src={exhibition.coverImage} alt="Analysis" className="w-full h-full object-cover" />
+                            <img src={getMediaUrl(exhibition.coverImage)} alt="Analysis" className="w-full h-full object-cover" />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center font-mono text-cyan-900/50 text-xs">
                                 // NO_VISUAL_FEED //

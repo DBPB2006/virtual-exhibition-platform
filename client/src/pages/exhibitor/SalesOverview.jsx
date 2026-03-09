@@ -27,8 +27,15 @@ const SalesOverview = () => {
         }
     }, [user]);
 
-    if (loading) return <div>Loading sales data...</div>;
-    if (error) return <div>{error}</div>;
+    if (loading) return (
+        <div className="min-h-[50vh] flex items-center justify-center">
+            <div className="text-xs font-mono uppercase tracking-widest text-neutral-400 animate-pulse">Loading sales data...</div>
+        </div>
+    );
+
+    if (error) return (
+        <div className="bg-red-50 text-red-600 p-4 border-l-2 border-red-500 text-sm font-mono">{error}</div>
+    );
 
     return (
         <div>

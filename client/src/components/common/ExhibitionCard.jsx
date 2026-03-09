@@ -1,5 +1,14 @@
 import { Link } from "react-router-dom";
 import { Calendar, Eye } from "lucide-react";
+import { motion } from "framer-motion";
+
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+const getMediaUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
 
 // Renders a visual card for an exhibition, adapting styles based on the exhibition theme (art, fashion, modern)
 export function ExhibitionCard({ exhibition, index, variant = 'default' }) {
@@ -21,7 +30,7 @@ export function ExhibitionCard({ exhibition, index, variant = 'default' }) {
       <div className={`absolute inset-0 w-full h-full overflow-hidden ${isArt ? "rounded-2xl" : ""}`}>
         {exhibition.coverImage ? (
           <motion.img
-            src={exhibition.coverImage}
+            src={getMediaUrl(exhibition.coverImage)}
             alt={exhibition.title}
             className={`object-cover w-full h-full transition-transform duration-1000 ease-out
                           ${isArt ? "group-hover:scale-105" : ""}

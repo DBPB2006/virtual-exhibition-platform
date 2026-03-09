@@ -1,7 +1,15 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { motion } from "framer-motion";
-import { Lock } from "lucide-react";
+import { Lock, Crown } from "lucide-react";
+
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+const getMediaUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
 
 // Displays a locked/restricted view of an exhibition card for unauthorized users
 export function RestrictedExhibitionCard({ exhibition }) {
@@ -24,8 +32,8 @@ export function RestrictedExhibitionCard({ exhibition }) {
             {/* Image Container */}
             <div className="absolute inset-0 w-full h-full">
                 {exhibition.coverImage ? (
-                    <motion.img
-                        src={exhibition.coverImage}
+                    <img
+                        src={getMediaUrl(exhibition.coverImage)}
                         alt={exhibition.title}
                         className="object-cover w-full h-full transition-transform duration-1000 ease-out group-hover:scale-105 opacity-80 group-hover:opacity-60"
                     />

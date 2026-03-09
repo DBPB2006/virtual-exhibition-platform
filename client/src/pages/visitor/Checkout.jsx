@@ -7,6 +7,13 @@ import { Spinner } from '@/components/ui/spinner';
 import { ArrowLeft, Lock, ShieldCheck, CreditCard } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const getMediaUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 // Renders the secure checkout page, handling payment processing via Razorpay and order creation
 const Checkout = () => {
     const { exhibitionId } = useParams();
@@ -75,7 +82,7 @@ const Checkout = () => {
                                     razorpay_signature: 'bypass_signature_mock'
                                 }
                             );
-                            navigate(`/exhibitions/${exhibitionId}/view`);
+                            navigate(`/exhibitions/view/${exhibitionId}`);
                         } catch (err) {
                             console.error("Mock verification failed", err);
                             alert("Mock Verification Failed");
@@ -190,7 +197,7 @@ const Checkout = () => {
                             <div className="aspect-[3/4] overflow-hidden mb-8 bg-neutral-100 relative">
                                 {exhibition.coverImage ? (
                                     <img
-                                        src={exhibition.coverImage}
+                                        src={getMediaUrl(exhibition.coverImage)}
                                         alt={exhibition.title}
                                         className="w-full h-full object-cover"
                                     />

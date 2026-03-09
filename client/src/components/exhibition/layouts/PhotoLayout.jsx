@@ -4,6 +4,14 @@ import { Navbar } from '@/components/common/Navbar';
 import { ArrowLeft } from 'lucide-react';
 import PurchaseButton from '../PurchaseButton';
 
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+const getMediaUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 // Renders the exhibition detail view for the 'Photography & Media' category, featuring a darkroom-inspired dark mode layout
 const PhotoLayout = ({ exhibition, isOwner, hasAccess }) => (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-red-600">
@@ -19,7 +27,7 @@ const PhotoLayout = ({ exhibition, isOwner, hasAccess }) => (
 
             <div className="absolute inset-0 bg-[#000]">
                 {exhibition.coverImage && (
-                    <img src={exhibition.coverImage} className="w-full h-full object-contain opacity-50" alt="Full Frame" />
+                    <img src={getMediaUrl(exhibition.coverImage)} className="w-full h-full object-contain opacity-50" alt="Full Frame" />
                 )}
             </div>
 

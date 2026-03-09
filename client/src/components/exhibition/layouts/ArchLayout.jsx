@@ -3,6 +3,14 @@ import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/common/Navbar'; // Assuming forceDark prop works
 import PurchaseButton from '../PurchaseButton';
 
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+const getMediaUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 // Renders the exhibition detail view for the 'Architecture & Design' category, featuring blueprint-inspired styling
 const ArchLayout = ({ exhibition, isOwner, hasAccess }) => (
     <div className="min-h-screen bg-[#F0F2F5] text-slate-900 font-sans relative">
@@ -34,7 +42,7 @@ const ArchLayout = ({ exhibition, isOwner, hasAccess }) => (
                         <div className="absolute bottom-4 right-4 w-4 h-4 border-r-2 border-b-2 border-blue-300" />
 
                         {exhibition.coverImage ? (
-                            <img src={exhibition.coverImage} className="w-full h-auto mix-blend-multiply filter contrast-125 grayscale" alt="Blueprint" />
+                            <img src={getMediaUrl(exhibition.coverImage)} className="w-full h-auto mix-blend-multiply filter contrast-125 grayscale" alt="Blueprint" />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center border-2 border-dashed border-blue-200/50 text-blue-300 font-mono text-xs uppercase tracking-widest">
                                 Blueprint Missing

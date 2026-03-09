@@ -88,10 +88,11 @@ const AdminOrders = () => {
                 {/* Minimalist Table */}
                 <div className="w-full">
                     <div className="flex border-b border-black text-xs font-bold uppercase tracking-widest pb-4 mb-4">
-                        <div className="w-1/4">Order ID</div>
-                        <div className="w-1/4">Customer</div>
-                        <div className="w-1/4">Date</div>
-                        <div className="w-1/4 text-right">Amount</div>
+                        <div className="w-1/5">Order ID</div>
+                        <div className="w-1/5">Customer</div>
+                        <div className="w-1/5">Exhibition</div>
+                        <div className="w-1/5">Date</div>
+                        <div className="w-1/5 text-right">Amount</div>
                     </div>
 
                     <div className="space-y-0">
@@ -102,17 +103,20 @@ const AdminOrders = () => {
                         ) : (
                             orders.map(order => (
                                 <div key={order._id} className="table-row-item flex items-center py-6 border-b border-neutral-100 hover:bg-neutral-50 transition-colors -mx-4 px-4">
-                                    <div className="w-1/4 font-mono text-sm text-neutral-400">
+                                    <div className="w-1/5 font-mono text-sm text-neutral-400">
                                         #{order._id.slice(-6).toUpperCase()}
                                     </div>
-                                    <div className="w-1/4">
-                                        <div className="font-medium text-lg font-light leading-none mb-1">{order.user?.name || "Guest"}</div>
-                                        <div className="text-xs text-neutral-400 font-mono lowercase">{order.user?.email}</div>
+                                    <div className="w-1/5">
+                                        <div className="font-medium text-lg font-light leading-none mb-1">{order.userId?.name || "Guest"}</div>
+                                        <div className="text-xs text-neutral-400 font-mono lowercase">{order.userId?.email}</div>
                                     </div>
-                                    <div className="w-1/4 font-mono text-sm text-neutral-500">
+                                    <div className="w-1/5 text-sm text-neutral-600 truncate pr-2">
+                                        {order.exhibitionId?.title || '—'}
+                                    </div>
+                                    <div className="w-1/5 font-mono text-sm text-neutral-500">
                                         {new Date(order.createdAt).toLocaleDateString()}
                                     </div>
-                                    <div className="w-1/4 text-right font-mono text-lg text-black">
+                                    <div className="w-1/5 text-right font-mono text-lg text-black">
                                         {formatCurrency(order.amount)}
                                     </div>
                                 </div>

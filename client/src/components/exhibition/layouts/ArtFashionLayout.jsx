@@ -5,6 +5,14 @@ import { ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import PurchaseButton from '../PurchaseButton';
 
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+const getMediaUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 // Renders the exhibition detail view for the 'Art & Fashion' category, featuring high-contrast editorial styling
 const ArtFashionLayout = ({ exhibition, isOwner, hasAccess }) => (
     <div className="min-h-screen bg-neutral-950 text-neutral-200 font-sans selection:bg-white selection:text-black">
@@ -22,7 +30,7 @@ const ArtFashionLayout = ({ exhibition, isOwner, hasAccess }) => (
                 >
                     <div className="aspect-[3/4] overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-1000 bg-neutral-900 border border-neutral-800">
                         {exhibition.coverImage ? (
-                            <img src={exhibition.coverImage} alt={exhibition.title} className="w-full h-full object-cover" />
+                            <img src={getMediaUrl(exhibition.coverImage)} alt={exhibition.title} className="w-full h-full object-cover" />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-neutral-700 font-mono text-xs uppercase tracking-widest">
                                 No Visual Data

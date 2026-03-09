@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Exhibition = require('../models/Exhibition');
 const Order = require('../models/Order');
 const ContactRequest = require('../models/ContactRequest');
+const Notification = require('../models/Notification');
 const requireAuthentication = require('../middlewares/requireAuthentication');
 const enforceRoleAccess = require('../middlewares/enforceRoleAccess');
 
@@ -61,10 +62,10 @@ router.get('/users', async (req, res) => {
 router.patch('/users/:id/role', async (req, res) => {
     try {
         const { role } = req.body;
-        const validRoles = ['visitor', 'exhibitor'];
 
-        if (!['visitor', 'exhibitor', 'admin'].includes(role)) {
-            return res.status(400).json({ message: "Invalid role" });
+        // Only visitor/exhibitor allowed — admins cannot be created via this endpoint
+        if (!['visitor', 'exhibitor'].includes(role)) {
+            return res.status(400).json({ message: "Invalid role. Must be 'visitor' or 'exhibitor'." });
         }
 
         const user = await User.findById(req.params.id);
@@ -181,12 +182,27 @@ router.patch('/exhibits/:id/verify', async (req, res) => {
         exhibition.verifiedBy = req.user.id;
 
         if (status === 'approved') {
-            exhibition.status = 'published'; // Auto-publish on approval for simplicity/flow
+            exhibition.status = 'published';
         } else if (status === 'rejected') {
-            exhibition.status = 'draft'; // Revert to draft if rejected?
+            exhibition.status = 'draft';
         }
 
         await exhibition.save();
+
+        // Notify the exhibitor of the decision
+        try {
+            await Notification.create({
+                userId: exhibition.createdBy,
+                title: status === 'approved' ? 'Exhibition Approved 🎉' : 'Exhibition Not Approved',
+                message: status === 'approved'
+                    ? `Your exhibition "${exhibition.title}" has been approved and is now live.`
+                    : `Your exhibition "${exhibition.title}" was not approved.${notes ? ' Reason: ' + notes : ''}`,
+                type: 'system',
+                link: `/exhibitions/${exhibition._id}`
+            });
+        } catch (notifErr) {
+            console.error('[WARN] Failed to send verification notification:', notifErr.message);
+        }
 
         res.json({ message: `Exhibition ${status}`, exhibition });
 
@@ -202,7 +218,9 @@ router.patch('/exhibits/:id/verify', async (req, res) => {
 router.get('/orders', async (req, res) => {
     try {
         const orders = await Order.find()
-            .populate('user', 'name email')
+            .populate('userId', 'name email')
+            .populate('exhibitorId', 'name')
+            .populate('exhibitionId', 'title')
             .sort({ createdAt: -1 });
         res.json(orders);
     } catch (error) {

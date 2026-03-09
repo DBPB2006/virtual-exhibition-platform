@@ -40,7 +40,7 @@ const Exhibition = require('../models/Exhibition');
 requireAuthentication.canAccessExhibit = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const userId = req.user ? req.user.id : req.session.user.id;
+        const userId = req.user?.id || req.session?.user?.id;
 
         if (!userId) {
             return res.status(401).json({ message: 'Unauthorized' });

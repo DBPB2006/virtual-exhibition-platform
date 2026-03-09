@@ -5,6 +5,13 @@ import { Spinner } from '@/components/ui/spinner';
 import { Package, Calendar, CreditCard, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const getMediaUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 // Renders the visitor's personal dashboard, displaying their purchased exhibition collection and order history
 const VisitorDashboard = () => {
     const { user } = useSelector((state) => state.auth);
@@ -72,7 +79,7 @@ const VisitorDashboard = () => {
                                 <div className="w-full md:w-32 aspect-square bg-neutral-100 shrink-0 overflow-hidden">
                                     {order.exhibitionId?.coverImage ? (
                                         <img
-                                            src={order.exhibitionId.coverImage}
+                                            src={getMediaUrl(order.exhibitionId.coverImage)}
                                             alt={order.exhibitionId.title}
                                             className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                                         />

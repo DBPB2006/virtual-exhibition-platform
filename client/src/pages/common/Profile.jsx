@@ -8,6 +8,14 @@ import { User, Mail, Calendar, LogOut, Shield, Crown, ChevronRight } from 'lucid
 import { Button } from '@/components/ui/button';
 import api from '@/api/axios';
 
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+const getMediaUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 const ProfileField = ({ label, value, icon: Icon }) => (
     <div className="flex items-center gap-4 py-4 border-b border-neutral-100 last:border-0">
         <div className="w-10 h-10 rounded-full bg-neutral-50 flex items-center justify-center text-neutral-400">
@@ -129,7 +137,7 @@ const Profile = () => {
                                     <label className="relative cursor-pointer group">
                                         <div className="w-32 h-32 rounded-full bg-white border-4 border-white shadow-xl overflow-hidden">
                                             {editForm.preview ? (
-                                                <img src={editForm.preview} alt="Profile" className="w-full h-full object-cover" />
+                                                <img src={getMediaUrl(editForm.preview)} alt="Profile" className="w-full h-full object-cover" />
                                             ) : (
                                                 <div className="w-full h-full bg-neutral-100 flex items-center justify-center text-neutral-300 text-4xl">
                                                     {user.name.charAt(0)}
@@ -146,7 +154,7 @@ const Profile = () => {
                             ) : (
                                 <div className="w-32 h-32 rounded-full bg-white border-4 border-white shadow-xl mb-6 flex items-center justify-center text-5xl font-light text-neutral-300 overflow-hidden">
                                     {user.picture ? (
-                                        <img src={user.picture} alt={user.name} className="w-full h-full object-cover" />
+                                        <img src={getMediaUrl(user.picture)} alt={user.name} className="w-full h-full object-cover" />
                                     ) : (
                                         user.name.charAt(0).toUpperCase()
                                     )}

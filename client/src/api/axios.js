@@ -14,12 +14,11 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            // If we get a 401, it means the session is invalid.
-            // We should redirect to login. Even if Redux thinks we are logged in.
-            if (window.location.pathname !== '/login') {
-                // Optional: Dispatch a custom event or manipulate window
-                // simpler approach: let the component handle it or auto-logout
-                // We rely on components to handle strict redirects, but this helps debugging
+            // Skip redirect for the auth status check itself
+            const url = error.config?.url || '';
+            const isAuthCheck = url.includes('/api/auth/status') || url.includes('/api/auth/me');
+            if (!isAuthCheck && window.location.pathname !== '/login') {
+                window.location.href = '/login';
             }
         }
         return Promise.reject(error);

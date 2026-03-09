@@ -11,6 +11,13 @@ import { Send, Users, MessageSquare, X } from "lucide-react";
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const getMediaUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 // Use Case: Heads-Up Display Component
 const HUD = ({ activeUsersCount, onToggleChat, onNavigateHome, onScrollToInfo }) => {
     return (
@@ -202,13 +209,13 @@ const ExhibitView = () => {
                                 />
                             ) : fullscreenMedia.type === 'image' ? (
                                 <img
-                                    src={fullscreenMedia.url}
+                                    src={getMediaUrl(fullscreenMedia.url)}
                                     alt="Fullscreen view"
                                     className="max-w-full max-h-[90vh] object-contain shadow-2xl"
                                 />
                             ) : (
                                 <img
-                                    src={fullscreenMedia.url}
+                                    src={getMediaUrl(fullscreenMedia.url)}
                                     alt="Fullscreen view"
                                     className="max-w-full max-h-[90vh] object-contain shadow-2xl"
                                 />
@@ -261,12 +268,12 @@ const ExhibitView = () => {
                                                     <div className="w-24 h-24 rounded-full bg-white border border-neutral-200 shadow-sm flex items-center justify-center mb-4 animate-pulse">
                                                         <FontAwesomeIcon icon={faWaveSquare} className="text-black text-3xl" />
                                                     </div>
-                                                    <audio src={currentMedia.url} controls className="w-full max-w-md" />
+                                                    <audio src={getMediaUrl(currentMedia.url)} controls className="w-full max-w-md" />
                                                     <p className="mt-4 text-neutral-500 font-mono text-xs uppercase tracking-widest">{currentMedia.originalName || "Audio Track"}</p>
                                                 </div>
                                             ) : (
                                                 <img
-                                                    src={currentMedia.url}
+                                                    src={getMediaUrl(currentMedia.url)}
                                                     className="w-full h-full object-contain mix-blend-multiply"
                                                     alt={`Exhibit Media ${currentIndex + 1}`}
                                                 />
@@ -303,7 +310,7 @@ const ExhibitView = () => {
                                 })()
                             ) : (
                                 <img
-                                    src={exhibition.coverImage}
+                                    src={getMediaUrl(exhibition.coverImage)}
                                     className="w-full h-full object-contain mix-blend-multiply"
                                     alt="Main Exhibit"
                                 />

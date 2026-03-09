@@ -3,9 +3,17 @@ import api from '@/api/axios';
 import { Spinner } from '@/components/ui/spinner';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Check, X, Eye, Clock } from 'lucide-react';
+import { ArrowLeft, Check, X, Eye, Clock, LayoutDashboard, Users, MessageSquare, AlertCircle, CheckCircle2, XCircle, Search, FileCheck2, Filter, ChevronRight, MoreHorizontal, ArrowUpRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
+
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+const getMediaUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
 
 // Filter Tabs
 const TABS = [
@@ -132,7 +140,7 @@ const AdminExhibitions = () => {
                                 {/* Simple Image Frame */}
                                 <div className="aspect-[4/3] bg-neutral-100 overflow-hidden mb-6 relative">
                                     {exhibit.coverImage ? (
-                                        <img src={exhibit.coverImage} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="Cover" />
+                                        <img src={getMediaUrl(exhibit.coverImage)} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="Cover" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-neutral-400 text-xs uppercase font-mono">No Image</div>
                                     )}
