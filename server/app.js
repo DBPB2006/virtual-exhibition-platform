@@ -9,6 +9,8 @@ const exhibitionRoutes = require('./src/routes/exhibitionRoutes');
 const userRoutes = require('./src/routes/userRoutes');
 
 const app = express();
+app.set('trust proxy', 1); // Trust first proxy (Render)
+
 
 app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
@@ -28,7 +30,8 @@ const sessionMiddleware = session({
     }),
     cookie: {
         httpOnly: true,
-        secure: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 1000 * 60 * 60 * 24 // 1 day
     }
 });
@@ -37,7 +40,7 @@ app.use(sessionMiddleware);
 app.sessionMiddleware = sessionMiddleware;
 
 app.use((req, res, next) => {
-    res.setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
     next();
 });
 
@@ -55,4 +58,12 @@ app.get('/health', (req, res) => {
     res.json({ status: "Server is running" });
 });
 
+const path = require('path');
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '../client', 'dist', 'index.html'));
+});
+
 module.exports = app;
+
