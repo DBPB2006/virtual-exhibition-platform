@@ -62,11 +62,12 @@ const Register = () => {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            setFormData({
-                ...formData,
+            const previewUrl = URL.createObjectURL(file);
+            setFormData(prev => ({
+                ...prev,
                 profilePicture: file,
-                profilePreview: URL.createObjectURL(file)
-            });
+                profilePreview: previewUrl
+            }));
         }
     };
 
@@ -108,9 +109,7 @@ const Register = () => {
                 data.append('profilePicture', formData.profilePicture);
             }
 
-            await api.post('/api/auth/register', data, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            await api.post('/api/auth/register', data);
 
             navigate('/login', { state: { message: "Account created! Please sign in with your new credentials." } });
         } catch (err) {
@@ -218,7 +217,7 @@ const Register = () => {
                                     <label className="relative cursor-pointer group">
                                         <div className="w-24 h-24 rounded-full bg-neutral-800 border-2 border-dashed border-neutral-600 flex items-center justify-center overflow-hidden transition-colors group-hover:border-white">
                                             {formData.profilePreview ? (
-                                                <img src={formData.profilePreview} alt="Preview" className="w-full h-full object-cover" />
+                                                <img src={formData.profilePreview} alt="Profile photo" className="w-full h-full object-cover" />
                                             ) : (
                                                 <div className="text-center">
                                                     <FontAwesomeIcon icon={faUser} className="text-2xl text-neutral-500 group-hover:text-white transition-colors" />

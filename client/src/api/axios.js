@@ -2,11 +2,10 @@ import axios from "axios";
 
 // Configures global Axios instance with base URL and credentials
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000",
+    baseURL: import.meta.env.VITE_API_URL || "http://localhost:5050",
     withCredentials: true, // Critical for session cookies
-    headers: {
-        "Content-Type": "application/json"
-    }
+    // NOTE: Do NOT set a default Content-Type here.
+    // Axios/browser must auto-set it (including multipart boundary) per request.
 });
 
 // Interceptor to handle session expiration globally

@@ -149,9 +149,7 @@ const EditExhibition = () => {
                 data.append('mediaToDelete', id);
             });
 
-            await api.put(`/api/exhibitions/${id}`, data, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            await api.put(`/api/exhibitions/${id}`, data);
 
             navigate('/dashboard/exhibitor');
         } catch (err) {

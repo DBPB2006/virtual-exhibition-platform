@@ -101,9 +101,7 @@ const CreateExhibition = () => {
                 data.append('mediaFiles', file);
             });
 
-            await api.post('/api/exhibitions', data, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            await api.post('/api/exhibitions', data);
 
             navigate('/dashboard/exhibitor');
         } catch (err) {

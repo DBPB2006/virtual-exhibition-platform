@@ -72,9 +72,7 @@ const Profile = () => {
                 formData.append('profilePicture', editForm.profilePicture);
             }
 
-            const res = await api.put('/api/users/me', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            const res = await api.put('/api/users/me', formData);
 
             // Update Redux
             dispatch(setCredentials({ user: res.data.user }));
