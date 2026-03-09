@@ -34,6 +34,7 @@ const sessionMiddleware = session({
         mongoUrl: process.env.MONGO_URI || 'mongodb://localhost:27017/virtual_exhibition',
         collectionName: 'sessions'
     }),
+    proxy: true, // Required for secure cookies behind a proxy
     cookie: {
         httpOnly: true,
         secure: true,
