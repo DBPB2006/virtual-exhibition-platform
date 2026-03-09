@@ -18,7 +18,7 @@ router.use(enforceRoleAccess(['admin']));
 router.get('/stats', async (req, res) => {
     try {
         const [userCount, exhibitCount, orderCount, revenueData] = await Promise.all([
-            User.countDocuments({ isDeleted: false }),
+            User.countDocuments({ isDeleted: { $ne: true } }),
             Exhibition.countDocuments(),
             Order.countDocuments(),
             Order.aggregate([
@@ -45,7 +45,7 @@ router.get('/stats', async (req, res) => {
 router.get('/users', async (req, res) => {
     try {
         // Exclude password, verified by Google ID etc.
-        const users = await User.find({ isDeleted: false })
+        const users = await User.find({ isDeleted: { $ne: true } })
             .select('-password -__v')
             .sort({ createdAt: -1 });
         res.json(users);
@@ -262,7 +262,7 @@ router.patch('/requests/:id/process', async (req, res) => {
 // Retrieves pending exhibitor users
 router.get('/pending-exhibitors', async (req, res) => {
     try {
-        const pendingUsers = await User.find({ role: 'exhibitor', status: 'pending', isDeleted: false })
+        const pendingUsers = await User.find({ role: 'exhibitor', status: 'pending', isDeleted: { $ne: true } })
             .select('-password -__v')
             .sort({ createdAt: -1 });
         res.json(pendingUsers);
