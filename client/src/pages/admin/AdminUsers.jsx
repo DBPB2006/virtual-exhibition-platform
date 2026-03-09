@@ -11,6 +11,7 @@ import gsap from 'gsap';
 const AdminUsers = () => {
     const [users, setUsers] = useState([]);
     const [requests, setRequests] = useState([]);
+    const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [searchParams] = useSearchParams();
@@ -23,6 +24,7 @@ const AdminUsers = () => {
             setUsers(res.data);
         } catch (err) {
             console.error("Fetch Users Error", err);
+            setError("Failed to fetch users. " + (err.response?.data?.message || "Check connection"));
         } finally {
             setLoading(false);
         }
@@ -240,7 +242,7 @@ const AdminUsers = () => {
                     <div className="space-y-0">
                         {filteredUsers.length === 0 ? (
                             <div className="text-center py-12 text-neutral-400 font-mono text-sm">
-                                NO MATCHES FOUND
+                                {error ? <span className="text-red-500 font-bold">{error}</span> : "NO MATCHES FOUND"}
                             </div>
                         ) : (
                             filteredUsers.map(user => {

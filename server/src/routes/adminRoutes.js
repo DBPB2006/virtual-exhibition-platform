@@ -48,6 +48,7 @@ router.get('/users', async (req, res) => {
         const users = await User.find({ isDeleted: { $ne: true } })
             .select('-password -__v')
             .sort({ createdAt: -1 });
+        console.log(`[DEBUG] Admin Users Fetch: Found ${users.length} users`);
         res.json(users);
     } catch (error) {
         console.error("Admin Users Error:", error);

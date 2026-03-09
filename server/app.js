@@ -12,11 +12,14 @@ const app = express();
 app.set('trust proxy', 1); // Trust first proxy (Render)
 
 
+const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    "http://localhost:5173",
+    "https://virtual-exhibition-platform.vercel.app" // Add explicit vercel support
+].filter(Boolean);
+
 app.use(cors({
-    origin: [
-        process.env.FRONTEND_URL,
-        "http://localhost:5173"
-    ],
+    origin: allowedOrigins,
     credentials: true
 }));
 app.use(express.json());
@@ -33,8 +36,8 @@ const sessionMiddleware = session({
     }),
     cookie: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        secure: true,
+        sameSite: "none",
         maxAge: 1000 * 60 * 60 * 24 // 1 day
     }
 });
