@@ -6,14 +6,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { ArrowLeft, Save, X, Upload } from 'lucide-react';
 import api from '@/api/axios';
 import gsap from 'gsap';
-
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-const getMediaUrl = (url) => {
-    if (!url) return '';
-    if (url.startsWith('http')) return url;
-    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
-};
+import { getMediaUrl } from '@/lib/mediaUrl';
 
 // Import Form Components
 import ExhibitionFormCore from '@/components/exhibition/form/ExhibitionFormCore';

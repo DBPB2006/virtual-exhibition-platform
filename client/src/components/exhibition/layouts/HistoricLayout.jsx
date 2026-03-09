@@ -4,14 +4,7 @@ import { Navbar } from '@/components/common/Navbar';
 import { ArrowLeft, Box } from 'lucide-react';
 import { motion } from 'framer-motion';
 import PurchaseButton from '../PurchaseButton';
-
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-const getMediaUrl = (url) => {
-    if (!url) return '';
-    if (url.startsWith('http')) return url;
-    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
-};
+import { getMediaUrl } from '@/lib/mediaUrl';
 
 // Renders the exhibition detail view for the 'Historic & Antique' category, featuring gold accents and classical styling
 const HistoricLayout = ({ exhibition, isOwner, hasAccess }) => (

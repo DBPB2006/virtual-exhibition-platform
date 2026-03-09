@@ -6,13 +6,7 @@ import { Navbar } from '@/components/common/Navbar';
 import { Spinner } from '@/components/ui/spinner';
 import { ArrowLeft, Lock, ShieldCheck, CreditCard } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-const getMediaUrl = (url) => {
-    if (!url) return '';
-    if (url.startsWith('http')) return url;
-    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
-};
+import { getMediaUrl } from '@/lib/mediaUrl';
 
 // Renders the secure checkout page, handling payment processing via Razorpay and order creation
 const Checkout = () => {

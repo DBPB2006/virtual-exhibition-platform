@@ -1,14 +1,7 @@
 import { Link } from "react-router-dom";
 import { Calendar, Eye } from "lucide-react";
 import { motion } from "framer-motion";
-
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-const getMediaUrl = (url) => {
-  if (!url) return '';
-  if (url.startsWith('http')) return url;
-  return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
-};
+import { getMediaUrl } from '@/lib/mediaUrl';
 
 // Renders a visual card for an exhibition, adapting styles based on the exhibition theme (art, fashion, modern)
 export function ExhibitionCard({ exhibition, index, variant = 'default' }) {

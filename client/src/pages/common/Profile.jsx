@@ -7,14 +7,7 @@ import { motion } from 'framer-motion';
 import { User, Mail, Calendar, LogOut, Shield, Crown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import api from '@/api/axios';
-
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-const getMediaUrl = (url) => {
-    if (!url) return '';
-    if (url.startsWith('http')) return url;
-    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
-};
+import { getMediaUrl } from '@/lib/mediaUrl';
 
 const ProfileField = ({ label, value, icon: Icon }) => (
     <div className="flex items-center gap-4 py-4 border-b border-neutral-100 last:border-0">

@@ -3,14 +3,7 @@ import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/common/Navbar';
 import { ArrowLeft } from 'lucide-react';
 import PurchaseButton from '../PurchaseButton';
-
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-const getMediaUrl = (url) => {
-    if (!url) return '';
-    if (url.startsWith('http')) return url;
-    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
-};
+import { getMediaUrl } from '@/lib/mediaUrl';
 
 // Renders the exhibition detail view for the 'Culture & Heritage' category, featuring earthy tones and texture overlays
 const CultureLayout = ({ exhibition, isOwner, hasAccess }) => (

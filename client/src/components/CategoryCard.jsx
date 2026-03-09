@@ -2,13 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
-
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-const getMediaUrl = (url) => {
-    if (!url) return '';
-    if (url.startsWith('http')) return url;
-    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
-};
+import { getMediaUrl } from '@/lib/mediaUrl';
 
 // Displays a clickable card for a specific category, showing a preview of exhibitions and facilitating navigation
 const CategoryCard = ({ category, description, exhibitions = [], count = 0 }) => {

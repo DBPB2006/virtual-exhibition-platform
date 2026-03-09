@@ -4,13 +4,7 @@ import { useSelector } from 'react-redux';
 import { Spinner } from '@/components/ui/spinner';
 import { Package, Calendar, CreditCard, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-const getMediaUrl = (url) => {
-    if (!url) return '';
-    if (url.startsWith('http')) return url;
-    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
-};
+import { getMediaUrl } from '@/lib/mediaUrl';
 
 // Renders the visitor's personal dashboard, displaying their purchased exhibition collection and order history
 const VisitorDashboard = () => {

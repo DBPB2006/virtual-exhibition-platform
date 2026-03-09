@@ -9,13 +9,7 @@ import {
     ArrowUpRight,
     Search
 } from 'lucide-react';
-
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-const getMediaUrl = (url) => {
-    if (!url) return '';
-    if (url.startsWith('http')) return url;
-    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
-};
+import { getMediaUrl } from '@/lib/mediaUrl';
 
 // Displays the main exhibitor dashboard with high-level metrics (total, live, pending, drafts, value) and quick actions
 const ExhibitorDashboard = () => {

@@ -6,14 +6,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, Check, X, Eye, Clock, LayoutDashboard, Users, MessageSquare, AlertCircle, CheckCircle2, XCircle, Search, FileCheck2, Filter, ChevronRight, MoreHorizontal, ArrowUpRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
-
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-const getMediaUrl = (url) => {
-    if (!url) return '';
-    if (url.startsWith('http')) return url;
-    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
-};
+import { getMediaUrl } from '@/lib/mediaUrl';
 
 // Filter Tabs
 const TABS = [

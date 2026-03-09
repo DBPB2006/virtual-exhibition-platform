@@ -24,7 +24,6 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
-app.use('/uploads', express.static('uploads'));
 
 const sessionMiddleware = session({
     secret: process.env.SESSION_SECRET || 'dev_fallback_secret', // Ideally, fail if missing in prod

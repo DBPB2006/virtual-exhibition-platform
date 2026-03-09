@@ -8,15 +8,9 @@ import { motion, useMotionValue, useMotionTemplate, AnimatePresence } from 'fram
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLandmark, faWaveSquare, faChevronDown, faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 import { Send, Users, MessageSquare, X } from "lucide-react";
+import { getMediaUrl } from '@/lib/mediaUrl';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-const getMediaUrl = (url) => {
-    if (!url) return '';
-    if (url.startsWith('http')) return url;
-    return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
-};
 
 // Use Case: Heads-Up Display Component
 const HUD = ({ activeUsersCount, onToggleChat, onNavigateHome, onScrollToInfo }) => {

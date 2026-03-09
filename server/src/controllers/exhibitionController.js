@@ -2,8 +2,6 @@ const mongoose = require("mongoose");
 const Exhibition = require("../models/Exhibition");
 const Notification = require("../models/Notification");
 const Order = require("../models/Order");
-const fs = require('fs');
-const path = require('path');
 
 // Creates a new exhibition listing with validation for dates and status
 
