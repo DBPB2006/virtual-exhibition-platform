@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ArrowRight, User, Bell, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getMediaUrl } from "@/lib/mediaUrl";
 import Logo from '@/assets/virtual_exhibit_logo.png';
 import OriginalLogo from '@/assets/original_logo.jpg';
 
@@ -10,6 +12,8 @@ import OriginalLogo from '@/assets/original_logo.jpg';
 export function ExhibitorNavbar({ forceDark = false }) {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const { user } = useSelector((state) => state.auth);
+    const profilePicture = user?.picture ? getMediaUrl(user.picture) : null;
 
     useEffect(() => {
         const handleScroll = () => {
@@ -87,8 +91,12 @@ export function ExhibitorNavbar({ forceDark = false }) {
                         </Link>
 
                         <Link to="/profile" className="flex items-center gap-2 group/profile text-current">
-                            <div className={`w-8 h-8 rounded-full border border-current flex items-center justify-center transition-all duration-300 group-hover/profile:bg-white group-hover/profile:text-black group-hover:text-white ${textColorClass}`}>
-                                <User className="w-4 h-4" />
+                            <div className={`w-8 h-8 rounded-full border border-current overflow-hidden flex items-center justify-center transition-all duration-300 group-hover:text-white ${textColorClass}`}>
+                                {profilePicture ? (
+                                    <img src={profilePicture} alt={user?.name || 'Profile'} className="w-full h-full object-cover" />
+                                ) : (
+                                    <User className="w-4 h-4" />
+                                )}
                             </div>
                         </Link>
                     </div>

@@ -151,16 +151,10 @@ const Register = () => {
                     return;
                 }
 
-                const { user } = response.data;
+                const { user, redirectPath } = response.data;
                 dispatch(setCredentials({ user, role: user.role }));
 
-                const redirectPath = user.role === 'admin'
-                    ? '/dashboard/admin'
-                    : user.role === 'exhibitor'
-                        ? '/dashboard/exhibitor'
-                        : '/';
-
-                navigate(redirectPath);
+                navigate(redirectPath || '/');
 
             } catch (err) {
                 console.error("Google Auth Error:", err);

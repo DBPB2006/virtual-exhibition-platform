@@ -41,7 +41,10 @@ const authSlice = createSlice({
     reducers: {
         setCredentials: (state, action) => {
             const { user } = action.payload;
-            state.user = user;
+            state.user = {
+                ...user,
+                picture: user.picture || '', // ensure picture is always present
+            };
             state.isAuthenticated = true;
             state.loading = false;
         },
@@ -60,7 +63,10 @@ const authSlice = createSlice({
                 state.loading = true;
             })
             .addCase(checkAuthStatus.fulfilled, (state, action) => {
-                state.user = action.payload;
+                state.user = {
+                    ...action.payload,
+                    picture: action.payload.picture || '', // ensure picture is always present
+                };
                 state.isAuthenticated = true;
                 state.loading = false;
             })

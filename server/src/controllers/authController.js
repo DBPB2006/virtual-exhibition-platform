@@ -1,10 +1,30 @@
 const bcrypt = require('bcryptjs');
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
+const { cloudinary } = require('../config/cloudinary');
 
 const VerificationCode = require('../models/VerificationCode');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+/**
+ * Uploads a remote image URL (e.g. Google profile picture) to Cloudinary.
+ * Returns the secure_url on success, or the original URL as a fallback.
+ */
+async function uploadGooglePicture(imageUrl) {
+    if (!imageUrl) return '';
+    try {
+        const result = await cloudinary.uploader.upload(imageUrl, {
+            folder: 'virtual-gallery/profiles',
+            resource_type: 'image',
+        });
+        console.log(`[INFO][AuthController] Google picture uploaded to Cloudinary: ${result.secure_url}`);
+        return result.secure_url;
+    } catch (err) {
+        console.error(`[WARN][AuthController] Cloudinary upload failed for Google picture, using original URL: ${err.message}`);
+        return imageUrl; // graceful fallback
+    }
+}
 
 async function verifyRecaptcha(token) {
     if (!token) return false;
@@ -124,6 +144,7 @@ exports.authenticateUser = async (req, res) => {
             name: user.name,
             email: user.email,
             role: user.role,
+            picture: user.picture || '',
             createdAt: user.createdAt
         };
 
@@ -170,7 +191,7 @@ exports.googleRegister = async (req, res) => {
             return res.status(400).json({ message: 'Invalid Google token' });
         }
 
-        const { googleId, email, name } = googleUser;
+        const { googleId, email, name, picture: googlePicture } = googleUser;
 
         // Check if user already exists
         const existingUser = await User.findOne({
@@ -180,6 +201,9 @@ exports.googleRegister = async (req, res) => {
         if (existingUser) {
             return res.status(400).json({ message: 'Account already exists. Please log in.' });
         }
+
+        // Upload Google profile picture to Cloudinary
+        const picture = await uploadGooglePicture(googlePicture);
 
         // Create New User
         // STRICT: Allow only 'visitor' or 'exhibitor'
@@ -200,7 +224,8 @@ exports.googleRegister = async (req, res) => {
             googleId,
             role: allocatedRole,
             status: status,
-            isEmailVerified: true // Google users are implicitly email verified
+            isEmailVerified: true, // Google users are implicitly email verified
+            picture
         });
 
         await newUser.save();
@@ -237,7 +262,7 @@ exports.googleLogin = async (req, res) => {
             return res.status(400).json({ message: 'Invalid Google token' });
         }
 
-        const { googleId, email } = googleUser;
+        const { googleId, email, picture: googlePicture } = googleUser;
 
         // Find User
         let user = await User.findOne({
@@ -259,10 +284,23 @@ exports.googleLogin = async (req, res) => {
             return res.status(403).json({ message: 'Your exhibitor account is pending admin approval.' });
         }
 
+        let needsSave = false;
+
         // Link Google ID if missing (seamless integration for email-registered users)
         if (!user.googleId) {
             user.googleId = googleId;
             user.authProvider = 'mixed'; // Denote that they have mainly email but linked google
+            needsSave = true;
+        }
+
+        // Backfill profile picture if user doesn't have one yet
+        if (!user.picture && googlePicture) {
+            console.log(`[INFO][AuthController] Backfilling profile picture for user: ${user.email}`);
+            user.picture = await uploadGooglePicture(googlePicture);
+            needsSave = true;
+        }
+
+        if (needsSave) {
             await user.save();
         }
 
@@ -317,6 +355,7 @@ function createSession(req, res, user, logMessage) {
         name: user.name,
         email: user.email,
         role: user.role,
+        picture: user.picture || '',
         createdAt: user.createdAt
     };
 
