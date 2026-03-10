@@ -10,6 +10,7 @@ import { RestrictedExhibitionCard } from '@/components/common/RestrictedExhibiti
 import { Spinner } from '@/components/ui/spinner';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { getMediaUrl } from '@/lib/mediaUrl';
+import api from '@/api/axios';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -45,15 +46,8 @@ const Home = () => {
     useEffect(() => {
         const fetchExhibitions = async () => {
             try {
-                // Remove artificial delay for smoother transitions
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-                const response = await fetch(`${apiUrl}/api/exhibitions`);
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch exhibitions');
-                }
-                const data = await response.json();
-                setExhibitions(data);
+                const response = await api.get('/api/exhibitions');
+                setExhibitions(response.data);
             } catch (err) {
                 console.error("Error loading exhibitions:", err);
                 setError("Unable to load exhibitions. Please try again later.");
@@ -118,7 +112,7 @@ const Home = () => {
 
             // 3. Image URL Handling
             coverImage: item.coverImage
-                ? (item.coverImage.startsWith('http') ? item.coverImage : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${item.coverImage}`)
+                ? (item.coverImage.startsWith('http') ? item.coverImage : `${import.meta.env.VITE_API_URL}${item.coverImage}`)
                 : "", // No Fallback
 
             // 4. Date formatting

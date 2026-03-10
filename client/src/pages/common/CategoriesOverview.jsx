@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Navbar } from '@/components/common/Navbar';
 import { Spinner } from '@/components/ui/spinner';
 import CategoryCard from '@/components/CategoryCard';
+import api from '@/api/axios';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -46,12 +47,8 @@ const CategoriesOverview = () => {
     useEffect(() => {
         const fetchExhibitions = async () => {
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/exhibitions`);
-
-                if (response.ok) {
-                    const data = await response.json();
-                    setExhibitions(data);
-                }
+                const response = await api.get('/api/exhibitions');
+                setExhibitions(response.data);
             } catch (error) {
                 console.error("Failed to fetch exhibitions", error);
             } finally {

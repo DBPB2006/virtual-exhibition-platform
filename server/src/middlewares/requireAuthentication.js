@@ -2,7 +2,6 @@ const User = require('../models/User');
 
 // Validates the user's session and active status, attaching the user object to the request
 const requireAuthentication = async (req, res, next) => {
-    console.log(`[DEBUG] Auth Check: ${req.method} ${req.originalUrl} | SessionID: ${req.sessionID} | HasUser: ${!!req.session?.user}`);
     if (req.session && req.session.user) {
         try {
             const user = await User.findById(req.session.user.id || req.session.user._id);

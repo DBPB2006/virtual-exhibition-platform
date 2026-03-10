@@ -58,10 +58,7 @@ exports.updateUserProfile = async (req, res) => {
 
         // Handle Profile Picture Upload
         if (req.file) {
-            console.log(`[INFO][UserController] Profile picture uploaded to: ${req.file.path}`);
             user.picture = req.file.path; // Cloudinary URL
-        } else {
-            console.log('[DEBUG][UserController] No profile picture file received in request');
         }
 
         await user.save();

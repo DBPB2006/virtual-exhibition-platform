@@ -5,17 +5,24 @@ const cookieParser = require('cookie-parser');
 const MongoStore = require('connect-mongo').default;
 const authRoutes = require('./src/routes/authRoutes');
 const exhibitionRoutes = require('./src/routes/exhibitionRoutes');
-
 const userRoutes = require('./src/routes/userRoutes');
+
+// Validate critical env vars at startup
+if (!process.env.SESSION_SECRET) {
+    console.error('[FATAL] SESSION_SECRET environment variable is not set. Exiting.');
+    process.exit(1);
+}
+if (!process.env.MONGO_URI) {
+    console.error('[FATAL] MONGO_URI environment variable is not set. Exiting.');
+    process.exit(1);
+}
 
 const app = express();
 app.set('trust proxy', 1); // Trust first proxy (Render)
 
-
+// CORS: Only allow explicitly configured frontend origin
 const allowedOrigins = [
     process.env.FRONTEND_URL,
-    "http://localhost:5173",
-    "https://virtual-exhibition-platform.vercel.app" // Add explicit vercel support
 ].filter(Boolean);
 
 app.use(cors({
@@ -26,11 +33,11 @@ app.use(express.json());
 app.use(cookieParser());
 
 const sessionMiddleware = session({
-    secret: process.env.SESSION_SECRET || 'dev_fallback_secret', // Ideally, fail if missing in prod
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-        mongoUrl: process.env.MONGO_URI || 'mongodb://localhost:27017/virtual_exhibition',
+        mongoUrl: process.env.MONGO_URI,
         collectionName: 'sessions'
     }),
     proxy: true, // Required for secure cookies behind a proxy
@@ -60,17 +67,6 @@ app.use('/api/admin', require('./src/routes/adminRoutes'));
 app.use('/api/contact', require('./src/routes/contactRoutes'));
 app.use('/api/verification', require('./src/routes/verificationRoutes'));
 
-// Session Debug Endpoint
-app.get('/api/session-debug', (req, res) => {
-    res.json({
-        sessionId: req.sessionID,
-        hasUser: !!req.session.user,
-        user: req.session.user || null,
-        cookie: req.session.cookie,
-        headers: req.headers['cookie'] ? 'Cookie present' : 'No cookie header'
-    });
-});
-
 app.get('/health', (req, res) => {
     res.json({ status: "Server is running" });
 });
@@ -97,4 +93,3 @@ app.use((req, res) => {
 });
 
 module.exports = app;
-

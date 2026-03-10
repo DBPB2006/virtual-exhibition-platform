@@ -17,7 +17,7 @@ import ExhibitionFormCommercial from '@/components/exhibition/form/ExhibitionFor
 const EditExhibition = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { user, token } = useSelector((state) => state.auth);
+    const { user } = useSelector((state) => state.auth);
     const formRef = useRef(null);
 
     const [loading, setLoading] = useState(true); // Initial fetch loading
@@ -91,7 +91,7 @@ const EditExhibition = () => {
         };
 
         fetchExhibition();
-    }, [id, token, user, navigate]);
+    }, [id, user, navigate]);
 
     // Handlers
     const handleChange = (e) => {
@@ -166,7 +166,7 @@ const EditExhibition = () => {
                     <ArrowLeft className="w-4 h-4" /> Cancel & Return
                 </Link>
 
-                <div ref={formRef}>
+                <div>
                     <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-4">Edit Exhibition</h1>
                     <p className="text-neutral-500 font-mono text-sm uppercase tracking-wide mb-12">
                         Refine your conceptual space.

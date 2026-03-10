@@ -15,7 +15,7 @@ import ExhibitionFormCommercial from '@/components/exhibition/form/ExhibitionFor
 // Renders the exhibition creation form, handling multi-step data entry (core details, media, commercial settings) and submission
 const CreateExhibition = () => {
     const navigate = useNavigate();
-    const { user, token } = useSelector((state) => state.auth);
+    const { user } = useSelector((state) => state.auth);
     const formRef = useRef(null);
 
     const [loading, setLoading] = useState(false);

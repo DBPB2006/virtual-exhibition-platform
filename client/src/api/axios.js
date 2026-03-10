@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Configures global Axios instance with base URL and credentials
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || "http://localhost:5050",
+    baseURL: import.meta.env.VITE_API_URL,
     withCredentials: true, // Critical for session cookies
     // NOTE: Do NOT set a default Content-Type here.
     // Axios/browser must auto-set it (including multipart boundary) per request.

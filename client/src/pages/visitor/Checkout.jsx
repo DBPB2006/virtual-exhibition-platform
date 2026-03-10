@@ -76,7 +76,7 @@ const Checkout = () => {
                                     razorpay_signature: 'bypass_signature_mock'
                                 }
                             );
-                            navigate(`/exhibitions/view/${exhibitionId}`);
+                            navigate(`/exhibitions/view/${exhibitionId}`, { replace: true });
                         } catch (err) {
                             console.error("Mock verification failed", err);
                             alert("Mock Verification Failed");
@@ -113,9 +113,9 @@ const Checkout = () => {
 
                         // Success Redirect
                         if (verificationResponse.data && verificationResponse.data.redirectTo) {
-                            navigate(verificationResponse.data.redirectTo);
+                            navigate(verificationResponse.data.redirectTo, { replace: true });
                         } else {
-                            navigate(`/exhibitions/view/${exhibitionId}`);
+                            navigate(`/exhibitions/view/${exhibitionId}`, { replace: true });
                         }
 
                     } catch (verifyErr) {

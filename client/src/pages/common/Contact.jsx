@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navbar } from '@/components/common/Navbar';
 import { Mail, MapPin, Phone } from 'lucide-react';
+import api from '@/api/axios';
 
 // Renders the public contact page, allowing users to send inquiries or requests for exhibitor access
 const Contact = () => {
@@ -21,11 +22,7 @@ const Contact = () => {
         setStatus('loading');
 
         try {
-            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/contact`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            });
+            await api.post('/api/contact', formData);
             setStatus('success');
             setFormData({ name: '', email: '', message: '', subject: 'General Inquiry' });
         } catch (error) {

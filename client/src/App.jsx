@@ -7,7 +7,6 @@ import { useEffect } from 'react';
 import Loader from './components/common/Loader';
 
 // Common
-// Common
 import Home from './pages/common/Home';
 import CategoriesOverview from './pages/common/CategoriesOverview';
 import Profile from './pages/common/Profile';

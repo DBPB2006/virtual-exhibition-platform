@@ -18,7 +18,6 @@ async function uploadGooglePicture(imageUrl) {
             folder: 'virtual-gallery/profiles',
             resource_type: 'image',
         });
-        console.log(`[INFO][AuthController] Google picture uploaded to Cloudinary: ${result.secure_url}`);
         return result.secure_url;
     } catch (err) {
         console.error(`[WARN][AuthController] Cloudinary upload failed for Google picture, using original URL: ${err.message}`);
@@ -65,10 +64,7 @@ exports.registerNewUser = async (req, res) => {
         // Handle Profile Picture
         let picture = "";
         if (req.file) {
-            console.log(`[INFO][AuthController] Registration picture uploaded to: ${req.file.path}`);
             picture = req.file.path; // Cloudinary URL
-        } else {
-            console.log('[DEBUG][AuthController] No registration file received in request');
         }
 
         // Role & Status Logic
@@ -295,7 +291,6 @@ exports.googleLogin = async (req, res) => {
 
         // Backfill profile picture if user doesn't have one yet
         if (!user.picture && googlePicture) {
-            console.log(`[INFO][AuthController] Backfilling profile picture for user: ${user.email}`);
             user.picture = await uploadGooglePicture(googlePicture);
             needsSave = true;
         }

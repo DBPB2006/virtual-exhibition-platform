@@ -10,7 +10,7 @@ import { faLandmark, faWaveSquare, faChevronDown, faCircleInfo } from '@fortawes
 import { Send, Users, MessageSquare, X } from "lucide-react";
 import { getMediaUrl } from '@/lib/mediaUrl';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const SOCKET_URL = import.meta.env.VITE_API_URL;
 
 // Use Case: Heads-Up Display Component
 const HUD = ({ activeUsersCount, onToggleChat, onNavigateHome, onScrollToInfo }) => {
@@ -137,7 +137,40 @@ const ExhibitView = () => {
         }
     };
 
-    const handleNavigateHome = () => navigate(`/exhibitions/${id}`);
+    // Map every possible category value (atomic + compound) to the correct browse route
+    const CATEGORY_ROUTE_MAP = {
+        // Compound categories
+        'Art & Fashion': '/exhibitions/art-fashion',
+        'Historic & Antique': '/exhibitions/historic-antique',
+        'Science & Technology': '/exhibitions/science-technology',
+        'Photography & Media': '/exhibitions/photography-media',
+        'Architecture & Design': '/exhibitions/architecture-design',
+        'Culture & Heritage': '/exhibitions/culture-heritage',
+        // Atomic categories → mapped to their parent compound route
+        'Art': '/exhibitions/art-fashion',
+        'Fashion': '/exhibitions/art-fashion',
+        'Historic': '/exhibitions/historic-antique',
+        'Antique': '/exhibitions/historic-antique',
+        'Science': '/exhibitions/science-technology',
+        'Technology': '/exhibitions/science-technology',
+        'Photography': '/exhibitions/photography-media',
+        'Media': '/exhibitions/photography-media',
+        'Architecture': '/exhibitions/architecture-design',
+        'Design': '/exhibitions/architecture-design',
+        'Culture': '/exhibitions/culture-heritage',
+        'Heritage': '/exhibitions/culture-heritage',
+    };
+
+    const handleNavigateHome = () => {
+        if (exhibition?.isForSale || exhibition?.price > 0) {
+            // Paid exhibit: go to My Collection
+            navigate('/dashboard/visitor');
+        } else {
+            // Free exhibit: resolve the correct category browse page
+            const target = CATEGORY_ROUTE_MAP[exhibition?.category] || '/categories';
+            navigate(target);
+        }
+    };
     const handleScrollToInfo = () => infoRef.current?.scrollIntoView({ behavior: 'smooth' });
 
     // Use Case: Dynamic Background
