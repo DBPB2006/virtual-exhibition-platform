@@ -9,6 +9,7 @@ import { ExhibitionCard } from '@/components/common/ExhibitionCard';
 import { RestrictedExhibitionCard } from '@/components/common/RestrictedExhibitionCard';
 import { Spinner } from '@/components/ui/spinner';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { getMediaUrl } from '@/lib/mediaUrl';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
