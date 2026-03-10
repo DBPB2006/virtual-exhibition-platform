@@ -4,15 +4,15 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 const upload = require('../middlewares/uploadMiddleware');
 
-// Wrapper: makes profile picture upload non-fatal.
-// If Cloudinary is down/misconfigured, registration still works — just without a photo.
+// Wrapper: makes profile picture upload non-fatal during registration.
+// Logs the FULL error so Cloudinary failures are visible in server logs.
 const uploadOptional = (req, res, next) => {
     upload.single('profilePicture')(req, res, (err) => {
         if (err) {
-            console.warn('[WARN][AuthRoute] Profile picture upload failed, continuing without it:', err.message);
-            req.file = null; // Ensure controller sees no file gracefully
+            // Log full error so we can diagnose Cloudinary failures
+            console.error('[ERROR][AuthRoute] Profile picture upload failed:', err);
         }
-        next(); // Always proceed to controller
+        next(); // Always proceed to controller even if upload fails
     });
 };
 

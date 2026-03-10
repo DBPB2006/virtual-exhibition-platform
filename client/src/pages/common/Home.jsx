@@ -197,9 +197,7 @@ const Home = () => {
                                             exhibition={{
                                                 ...exhibition,
                                                 id: exhibition._id,
-                                                coverImage: exhibition.coverImage && exhibition.coverImage.startsWith('http')
-                                                    ? exhibition.coverImage
-                                                    : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${exhibition.coverImage}`
+                                                coverImage: getMediaUrl(exhibition.coverImage)
                                             }}
                                         />
                                     ))}

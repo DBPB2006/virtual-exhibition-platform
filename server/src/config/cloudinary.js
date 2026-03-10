@@ -11,20 +11,27 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: async (req, file) => {
-        // Determine folder and resource type
         let folder = 'virtual-gallery/others';
         let resource_type = 'auto';
 
         if (file.fieldname === 'profilePicture') {
             folder = 'virtual-gallery/profiles';
+            resource_type = 'image';
         } else if (file.fieldname === 'mediaFiles') {
             folder = 'virtual-gallery/exhibitions';
         }
 
+        // Strip the extension from originalname to prevent double-extension issues
+        // e.g. "avatar.JPG" → "avatar", not "avatar.JPG.jpg"
+        const baseName = file.originalname.replace(/\.[^/.]+$/, '').replace(/\s+/g, '_');
+        const uniqueName = `${Date.now()}-${baseName}`;
+
         return {
-            folder: folder,
-            resource_type: resource_type,
-            public_id: `${Date.now()}-${file.originalname.split('.')[0]}`,
+            folder,
+            resource_type,
+            public_id: uniqueName,
+            // Explicitly allow these formats so multer-storage-cloudinary v4+ doesn't reject them
+            allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'webm', 'mp3', 'wav', 'pdf'],
         };
     },
 });
