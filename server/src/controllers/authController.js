@@ -45,7 +45,10 @@ exports.registerNewUser = async (req, res) => {
         // Handle Profile Picture
         let picture = "";
         if (req.file) {
+            console.log(`[INFO][AuthController] Registration picture uploaded to: ${req.file.path}`);
             picture = req.file.path; // Cloudinary URL
+        } else {
+            console.log('[DEBUG][AuthController] No registration file received in request');
         }
 
         // Role & Status Logic
