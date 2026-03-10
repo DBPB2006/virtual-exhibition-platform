@@ -14,7 +14,7 @@ const ExhibitionFormMedia = ({ mediaPreviews, mediaFiles, handleMediaChange, rem
                         <input
                             type="file"
                             multiple
-                            accept="image/*,video/*,audio/*"
+                            accept="image/*,image/heic,image/heif,.heic,.heif,.bmp,.tiff,.tif,.svg,video/*,audio/*"
                             onChange={handleMediaChange}
                             className="absolute inset-0 opacity-0 cursor-pointer z-10"
                             disabled={isUploading}
@@ -54,7 +54,7 @@ const ExhibitionFormMedia = ({ mediaPreviews, mediaFiles, handleMediaChange, rem
                     })}
                 </div>
                 <p className="mt-4 text-[10px] font-mono text-neutral-400 uppercase tracking-wide">
-                    Supported: Images, Video, Audio // Max 100MB per file
+                    Supported: Images (JPG, PNG, WebP, HEIC, BMP, TIFF, SVG), Video, Audio // Max 100MB
                 </p>
             </div>
         </div>

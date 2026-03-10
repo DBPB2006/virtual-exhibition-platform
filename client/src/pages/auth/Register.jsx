@@ -222,7 +222,7 @@ const Register = () => {
                                         <input
                                             type="file"
                                             name="profilePicture"
-                                            accept="image/*"
+                                            accept="image/*,image/heic,image/heif,.heic,.heif,.bmp,.tiff,.tif,.svg,.webp"
                                             onChange={handleFileChange}
                                             className="hidden"
                                         />

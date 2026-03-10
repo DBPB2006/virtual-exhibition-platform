@@ -139,7 +139,7 @@ const Profile = () => {
                                                 <span className="text-white text-xs uppercase font-bold tracking-widest">Change</span>
                                             </div>
                                         </div>
-                                        <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                                        <input type="file" accept="image/*,image/heic,image/heif,.heic,.heif,.bmp,.tiff,.tif,.svg,.webp" className="hidden" onChange={handleFileChange} />
                                     </label>
                                 </div>
                             ) : (

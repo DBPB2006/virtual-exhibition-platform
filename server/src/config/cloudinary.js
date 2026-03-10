@@ -45,7 +45,8 @@ const storage = new CloudinaryStorage({
             resource_type,
             public_id: uniqueName,
             // Explicitly allow these formats so multer-storage-cloudinary v4+ doesn't reject them
-            allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'webm', 'mp3', 'wav', 'pdf'],
+            // Cross-OS support: heic/heif (iPhone/macOS), bmp/tiff (Windows), svg, webp
+            allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'tif', 'heic', 'heif', 'svg', 'mp4', 'webm', 'mp3', 'wav', 'pdf'],
         };
     },
 });
