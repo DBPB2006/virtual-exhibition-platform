@@ -14,8 +14,27 @@ const Loader = ({ isLoading }) => {
     const [shouldExit, setShouldExit] = useState(false);
     const [isUnmounted, setIsUnmounted] = useState(false);
 
+    // Initial counter animation - runs once on mount
     useEffect(() => {
-        // Enforce minimum 2 seconds display time
+        let ctx = gsap.context(() => {
+            gsap.fromTo(counterRef.current,
+                { val: 0 },
+                {
+                    val: 100,
+                    duration: 2.5,
+                    ease: 'power2.out',
+                    onUpdate: () => {
+                        setProgress(Math.floor(counterRef.current.val));
+                    }
+                }
+            );
+        });
+
+        return () => ctx.revert();
+    }, []);
+
+    // Timer check for exit logic
+    useEffect(() => {
         let timer;
         if (!isLoading) {
             timer = setTimeout(() => {
@@ -25,73 +44,47 @@ const Loader = ({ isLoading }) => {
         return () => clearTimeout(timer);
     }, [isLoading]);
 
+    // Exit animation - runs only when shouldExit is triggered
     useEffect(() => {
-        if (isUnmounted) return;
+        if (!shouldExit || isUnmounted) return;
 
         let ctx = gsap.context(() => {
-            if (shouldExit) {
-                const tl = gsap.timeline({
-                    onComplete: () => {
-                        setIsUnmounted(true);
-                    }
-                });
-
-                // 1. Fade out content
-                tl.to(contentRef.current, {
-                    opacity: 0,
-                    scale: 0.9,
-                    duration: 0.5,
-                    ease: 'power2.inOut'
-                })
-                    // 2. Grow the line from center (Horizontally)
-                    .to(lineRef.current, {
-                        width: '100%',
-                        opacity: 1,
-                        duration: 0.8,
-                        ease: 'power3.inOut'
-                    })
-                    // 3. Open the "zipper" (panels slide apart vertically)
-                    .to([topPanelRef.current, bottomPanelRef.current], {
-                        yPercent: (i) => i === 0 ? -100 : 100, // Top moves -100% (up), Bottom moves 100% (down)
-                        duration: 1.0,
-                        ease: 'power4.inOut',
-                        stagger: 0
-                    })
-                    // 4. Fade out line simultaneously or just after
-                    .to(lineRef.current, {
-                        opacity: 0,
-                        duration: 0.3
-                    }, "-=0.8");
-
-            } else if (isLoading) {
-                // Reset state
-                if (containerRef.current) {
-                    gsap.set(containerRef.current, { display: 'flex', yPercent: 0 }); // Ensure container is there
-                    gsap.set(contentRef.current, { opacity: 1, scale: 1 });
-
-                    // Reset zipper elements
-                    gsap.set(lineRef.current, { width: '0%', opacity: 1 });
-                    gsap.set(topPanelRef.current, { yPercent: 0 });
-                    gsap.set(bottomPanelRef.current, { yPercent: 0 });
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    setIsUnmounted(true);
                 }
+            });
 
-                // Loading counter animation
-                gsap.fromTo(counterRef.current,
-                    { val: 0 },
-                    {
-                        val: 100,
-                        duration: 2.5,
-                        ease: 'power2.out',
-                        onUpdate: () => {
-                            setProgress(Math.floor(counterRef.current.val));
-                        }
-                    }
-                );
-            }
+            // 1. Fade out content
+            tl.to(contentRef.current, {
+                opacity: 0,
+                scale: 0.9,
+                duration: 0.5,
+                ease: 'power2.inOut'
+            })
+                // 2. Grow the line from center (Horizontally)
+                .to(lineRef.current, {
+                    width: '100%',
+                    opacity: 1,
+                    duration: 0.8,
+                    ease: 'power3.inOut'
+                })
+                // 3. Open the "zipper" (panels slide apart vertically)
+                .to([topPanelRef.current, bottomPanelRef.current], {
+                    yPercent: (i) => i === 0 ? -100 : 100,
+                    duration: 1.0,
+                    ease: 'power4.inOut',
+                    stagger: 0
+                })
+                // 4. Fade out line simultaneously or just after
+                .to(lineRef.current, {
+                    opacity: 0,
+                    duration: 0.3
+                }, "-=0.8");
         });
 
         return () => ctx.revert();
-    }, [shouldExit, isLoading, isUnmounted]);
+    }, [shouldExit, isUnmounted]);
 
     if (isUnmounted) return null;
 
