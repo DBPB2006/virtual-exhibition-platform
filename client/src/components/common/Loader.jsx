@@ -24,7 +24,9 @@ const Loader = ({ isLoading }) => {
                     duration: 3.5, // slightly longer to emphasize the slowdown
                     ease: 'power3.out', // pronounced slowdown near the end
                     onUpdate: () => {
-                        setProgress(Math.floor(counterRef.current.val));
+                        // Clamp to 90 to prevent any easing overshoot
+                        const safeVal = Math.min(90, Math.floor(counterRef.current.val));
+                        setProgress(safeVal);
                     }
                 }
             );
@@ -37,15 +39,20 @@ const Loader = ({ isLoading }) => {
     useEffect(() => {
         if (!isLoading) {
             let ctx = gsap.context(() => {
+                // Kill any existing tweens on counterRef to prevent overlap
+                gsap.killTweensOf(counterRef.current);
+
                 const remainingProgress = 100 - counterRef.current.val;
-                const dynamicDuration = Math.max(0.5, (remainingProgress / 100) * 1.5);
+                const dynamicDuration = Math.max(0.4, (remainingProgress / 100) * 1.5);
 
                 gsap.to(counterRef.current, {
                     val: 100,
                     duration: dynamicDuration,
                     ease: 'power2.inOut',
                     onUpdate: () => {
-                        setProgress(Math.floor(counterRef.current.val));
+                        // Clamp to 100 to prevent any easing overshoot
+                        const safeVal = Math.min(100, Math.floor(counterRef.current.val));
+                        setProgress(safeVal);
                     },
                     onComplete: () => {
                         setShouldExit(true); // Trigger exit animation once we reach 100%
@@ -56,6 +63,15 @@ const Loader = ({ isLoading }) => {
             return () => ctx.revert();
         }
     }, [isLoading]);
+
+    // Fallback timer: force exit if backend hangs for too long (10s)
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setShouldExit(true);
+        }, 10000);
+        
+        return () => clearTimeout(timer);
+    }, []);
 
     // Dynamic text based on progress and backend state
     let statusText = 'Connecting to server...';
