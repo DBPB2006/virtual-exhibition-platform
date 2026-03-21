@@ -9,7 +9,7 @@ const ProtectedRoute = ({ children }) => {
     const location = useLocation();
 
     if (loading) {
-        return <Loader />;
+        return null;
     }
 
     if (!user && !isAuthenticated) {

@@ -8,7 +8,7 @@ const RoleGuard = ({ children, allowedRoles }) => {
     const { user, loading } = useSelector((state) => state.auth);
 
     if (loading) {
-        return <Loader />;
+        return null;
     }
 
     if (!user) {

@@ -8,7 +8,7 @@ const PublicHomeGuard = ({ children }) => {
     const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
 
     if (loading) {
-        return <Loader />;
+        return null;
     }
 
     if (isAuthenticated && user) {

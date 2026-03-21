@@ -3,7 +3,7 @@ import { AnimatePresence } from 'framer-motion';
 import { NotificationProvider } from './context/NotificationContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { checkAuthStatus } from './features/auth/authSlice';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Loader from './components/common/Loader';
 
 // Common
@@ -186,15 +186,26 @@ function AnimatedRoutes() {
 
 function App() {
   const dispatch = useDispatch();
-  const { loading } = useSelector((state) => state.auth);
+  const [appReady, setAppReady] = useState(false);
 
   useEffect(() => {
-    dispatch(checkAuthStatus());
+    // 1. Dispatch checkAuthStatus and handle its completion with .finally()
+    // 2. Set a fallback timeout (4 seconds) to guarantee Loader exits even if the backend is slow
+    const timeoutId = setTimeout(() => {
+      setAppReady(true);
+      console.log('App ready triggered by fallback timeout');
+    }, 4000);
+
+    dispatch(checkAuthStatus())
+      .finally(() => {
+        setAppReady(true);
+        clearTimeout(timeoutId);
+      });
   }, [dispatch]);
 
   return (
     <Router>
-      <Loader isLoading={loading} />
+      <Loader isLoading={!appReady} />
       <NotificationProvider>
         <AnimatedRoutes />
       </NotificationProvider>
