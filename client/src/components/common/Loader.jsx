@@ -21,7 +21,7 @@ const Loader = ({ isLoading }) => {
                 { val: 0 },
                 {
                     val: 90,
-                    duration: 3.5, // slightly longer to emphasize the slowdown
+                    duration: 4, // slightly longer to emphasize the slowdown
                     ease: 'power3.out', // pronounced slowdown near the end
                     onUpdate: () => {
                         // Clamp to 90 to prevent any easing overshoot
