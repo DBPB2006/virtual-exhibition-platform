@@ -69,7 +69,7 @@ const Loader = ({ isLoading }) => {
         const timer = setTimeout(() => {
             setShouldExit(true);
         }, 10000);
-        
+
         return () => clearTimeout(timer);
     }, []);
 
